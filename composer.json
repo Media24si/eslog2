@@ -1,0 +1,42 @@
+{
+  "name": "media24si/eslog2",
+  "description": "eSlog 2.0 php generator",
+  "keywords": [
+    "eSlog 2.0"
+  ],
+  "homepage": "https://github.com/media24si/eslog2",
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Bostjan Oblak",
+      "email": "bostjan.oblak@salomon.si"
+    }
+  ],
+  "require": {
+    "php": "^7.4|^8.0",
+    "ext-simplexml": "*",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Media24si\\eSlog2\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Media24si\\eSlog2\\Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
