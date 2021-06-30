@@ -39,45 +39,45 @@ class Invoice
     public Business $issuer;
     public Business $recipient;
 
-    public string $invoice_number;
+    public string $invoiceNumber;
 
-    public float $total_without_tax;
-    public float $total_with_tax;
+    public float $totalWithoutTax;
+    public float $totalWithTax;
 
-    public string $location_address;
+    public string $locationAddress;
 
-    public \DateTime $date_issued;
-    public \DateTime $date_of_service;
-    public \DateTime $date_due;
+    public \DateTime $dateIssued;
+    public \DateTime $dateOfService;
+    public \DateTime $dateDue;
 
-    public string $payment_reference;
+    public string $paymentReference;
 
-    public ?float $global_discount_amount = null;
-    public ?float $global_discount_percentage = null;
+    public ?float $globalDiscountAmount = null;
+    public ?float $globalDiscountPercentage = null;
 
-    public ?string $intro_text = null;
-    public ?string $outro_text = null;
+    public ?string $introText = null;
+    public ?string $outroText = null;
 
-    public int $invoice_type = self::TYPE_INVOICE;
+    public int $invoiceType = self::TYPE_INVOICE;
     public string $currency = 'EUR';
-    public int $invoice_function = self::FUNCTION_ORIGINAL;
-    public int $payment_type = self::PAYMENT_REQUIRED;
-    public string $payment_purpose = 'GDSV';
-    public ?string $additional_remittance_information = null;
+    public int $invoiceFunction = self::FUNCTION_ORIGINAL;
+    public int $paymentType = self::PAYMENT_REQUIRED;
+    public string $paymentPurpose = 'GDSV';
+    public ?string $additionalRemittanceInformation = null;
 
-    public int $location_code = self::LOCATION_ISSUED;
+    public int $locationCode = self::LOCATION_ISSUED;
 
-    public int $date_issued_code = 137;
-    public int $date_of_service_code = 35;
-    public int $date_due_code = 13;
+    public int $dateIssuedCode = 137;
+    public int $dateOfServiceCode = 35;
+    public int $dateDueCode = 13;
 
-    public array $reference_documents = [];
+    public array $referenceDocuments = [];
 
-    public array $document_items = [];
+    public array $items = [];
 
-    public float $total_without_discount = 0;
+    public float $totalWithoutDiscount = 0;
 
-    public array $tax_summaries = [];
+    public array $taxSummaries = [];
 
     public function setIssuer(Business $issuer): Invoice
     {
@@ -93,93 +93,93 @@ class Invoice
         return $this;
     }
 
-    public function setInvoiceNumber(string $invoice_number): Invoice
+    public function setInvoiceNumber(string $invoiceNumber): Invoice
     {
-        $this->invoice_number = $invoice_number;
+        $this->invoiceNumber = $invoiceNumber;
 
         return $this;
     }
 
-    public function setTotalWithoutTax(float $total_without_tax): Invoice
+    public function setTotalWithoutTax(float $totalWithoutTax): Invoice
     {
-        $this->total_without_tax = $total_without_tax;
+        $this->totalWithoutTax = $totalWithoutTax;
 
         return $this;
     }
 
-    public function setTotalWithTax(float $total_with_tax): Invoice
+    public function setTotalWithTax(float $totalWithTax): Invoice
     {
-        $this->total_with_tax = $total_with_tax;
+        $this->totalWithTax = $totalWithTax;
 
         return $this;
     }
 
-    public function setLocationAddress(string $location_address): Invoice
+    public function setLocationAddress(string $locationAddress): Invoice
     {
-        $this->location_address = $location_address;
+        $this->locationAddress = $locationAddress;
 
         return $this;
     }
 
-    public function setDateIssued(\DateTime $date_issued): Invoice
+    public function setDateIssued(\DateTime $dateIssued): Invoice
     {
-        $this->date_issued = $date_issued;
+        $this->dateIssued = $dateIssued;
 
         return $this;
     }
 
-    public function setDateOfService(\DateTime $date_of_service): Invoice
+    public function setDateOfService(\DateTime $dateOfService): Invoice
     {
-        $this->date_of_service = $date_of_service;
+        $this->dateOfService = $dateOfService;
 
         return $this;
     }
 
-    public function setDateDue(\DateTime $date_due): Invoice
+    public function setDateDue(\DateTime $dateDue): Invoice
     {
-        $this->date_due = $date_due;
+        $this->dateDue = $dateDue;
 
         return $this;
     }
 
-    public function setPaymentReference(string $payment_reference): Invoice
+    public function setPaymentReference(string $paymentReference): Invoice
     {
-        $this->payment_reference = $payment_reference;
+        $this->paymentReference = $paymentReference;
 
         return $this;
     }
 
-    public function setGlobalDiscountAmount(?float $global_discount_amount): Invoice
+    public function setGlobalDiscountAmount(?float $globalDiscountAmount): Invoice
     {
-        $this->global_discount_amount = $global_discount_amount;
+        $this->globalDiscountAmount = $globalDiscountAmount;
 
         return $this;
     }
 
-    public function setGlobalDiscountPercentage(?float $global_discount_percentage): Invoice
+    public function setGlobalDiscountPercentage(?float $globalDiscountPercentage): Invoice
     {
-        $this->global_discount_percentage = $global_discount_percentage;
+        $this->globalDiscountPercentage = $globalDiscountPercentage;
 
         return $this;
     }
 
-    public function setIntroText(?string $intro_text): Invoice
+    public function setIntroText(?string $introText): Invoice
     {
-        $this->intro_text = $intro_text;
+        $this->introText = $introText;
 
         return $this;
     }
 
-    public function setOutroText(?string $outro_text): Invoice
+    public function setOutroText(?string $outroText): Invoice
     {
-        $this->outro_text = $outro_text;
+        $this->outroText = $outroText;
 
         return $this;
     }
 
-    public function setInvoiceType(int $invoice_type): Invoice
+    public function setInvoiceType(int $invoiceType): Invoice
     {
-        $this->invoice_type = $invoice_type;
+        $this->invoiceType = $invoiceType;
 
         return $this;
     }
@@ -191,86 +191,86 @@ class Invoice
         return $this;
     }
 
-    public function setInvoiceFunction(int $invoice_function): Invoice
+    public function setInvoiceFunction(int $invoiceFunction): Invoice
     {
-        $this->invoice_function = $invoice_function;
+        $this->invoiceFunction = $invoiceFunction;
 
         return $this;
     }
 
-    public function setPaymentType(int $payment_type): Invoice
+    public function setPaymentType(int $paymentType): Invoice
     {
-        $this->payment_type = $payment_type;
+        $this->paymentType = $paymentType;
 
         return $this;
     }
 
-    public function setPaymentPurpose(string $payment_purpose): Invoice
+    public function setPaymentPurpose(string $paymentPurpose): Invoice
     {
-        $this->payment_purpose = $payment_purpose;
+        $this->paymentPurpose = $paymentPurpose;
 
         return $this;
     }
 
-    public function setAdditionalRemittanceInformation(?string $additional_remittance_information): Invoice
+    public function setAdditionalRemittanceInformation(?string $additionalRemittanceInformation): Invoice
     {
-        $this->additional_remittance_information = $additional_remittance_information;
+        $this->additionalRemittanceInformation = $additionalRemittanceInformation;
 
         return $this;
     }
 
-    public function setLocationCode(int $location_code): Invoice
+    public function setLocationCode(int $locationCode): Invoice
     {
-        $this->location_code = $location_code;
+        $this->locationCode = $locationCode;
 
         return $this;
     }
 
-    public function setDateIssuedCode(int $date_issued_code): Invoice
+    public function setDateIssuedCode(int $dateIssuedCode): Invoice
     {
-        $this->date_issued_code = $date_issued_code;
+        $this->dateIssuedCode = $dateIssuedCode;
 
         return $this;
     }
 
-    public function setDateOfServiceCode(int $date_of_service_code): Invoice
+    public function setDateOfServiceCode(int $dateOfServiceCode): Invoice
     {
-        $this->date_of_service_code = $date_of_service_code;
+        $this->dateOfServiceCode = $dateOfServiceCode;
 
         return $this;
     }
 
-    public function setDateDueCode(int $date_due_code): Invoice
+    public function setDateDueCode(int $dateDueCode): Invoice
     {
-        $this->date_due_code = $date_due_code;
+        $this->dateDueCode = $dateDueCode;
 
         return $this;
     }
 
-    public function setTotalWithoutDiscount(float $total_without_discount): Invoice
+    public function setTotalWithoutDiscount(float $totalWithoutDiscount): Invoice
     {
-        $this->total_without_discount = $total_without_discount;
+        $this->totalWithoutDiscount = $totalWithoutDiscount;
 
         return $this;
     }
 
     public function addReferenceDocument(ReferenceDocument $referenceDocument): Invoice
     {
-        $this->reference_documents[] = $referenceDocument;
+        $this->referenceDocuments[] = $referenceDocument;
 
         return $this;
     }
 
     public function addItem(InvoiceItem $item): Invoice
     {
-        $this->document_items[] = $item;
+        $this->items[] = $item;
 
         return $this;
     }
 
     public function addTaxSummary(TaxSummary $taxSummary): Invoice
     {
-        $this->tax_summaries[] = $taxSummary;
+        $this->taxSummaries[] = $taxSummary;
 
         return $this;
     }
@@ -284,7 +284,7 @@ class Invoice
 
         // Document header
         $docHeader = $mInvoice->addChild('S_UNH');
-        $docHeader->addChild('D_0062', $this->invoice_number);
+        $docHeader->addChild('D_0062', $this->invoiceNumber);
         $docHeader_C = $docHeader->addChild('C_S009');
         $docHeader_C->addChild('D_0065', 'INVOIC');
         $docHeader_C->addChild('D_0052', 'D');
@@ -294,45 +294,53 @@ class Invoice
         // Header
         $header = $mInvoice->addChild('S_BGM');
         $header->addChild('C_C002')
-            ->addChild('D_1001', $this->invoice_type);
+            ->addChild('D_1001', $this->invoiceType);
         $header->addChild('C_C106')
-            ->addChild('D_1004', $this->invoice_number);
+            ->addChild('D_1004', $this->invoiceNumber);
 
         // Date Issued
         $dateIssues = $mInvoice->addChild('S_DTM')
             ->addChild('C_C507');
-        $dateIssues->addChild('D_2005', $this->date_issued_code);
-        $dateIssues->addChild('D_2380', $this->date_issued->format('Y-m-d'));
+        $dateIssues->addChild('D_2005', $this->dateIssuedCode);
+        $dateIssues->addChild('D_2380', $this->dateIssued->format('Y-m-d'));
 
         // Date Of service
         $dateIssues = $mInvoice->addChild('S_DTM')
             ->addChild('C_C507');
-        $dateIssues->addChild('D_2005', $this->date_of_service_code);
-        $dateIssues->addChild('D_2380', $this->date_of_service->format('Y-m-d'));
+        $dateIssues->addChild('D_2005', $this->dateOfServiceCode);
+        $dateIssues->addChild('D_2380', $this->dateOfService->format('Y-m-d'));
 
         // Payment type
         $paymentType = $mInvoice->addChild('S_FTX');
         $paymentType->addChild('D_4451', 'PAI');
         $paymentType->addChild('C_C108')
-            ->addChild('D_4440', $this->payment_type);
+            ->addChild('D_4440', $this->paymentType);
+
+        // Doc
+        $ftxDoc = $mInvoice->addChild('S_FTX');
+        $ftxDoc->addChild('D_4451', 'DOC');
+        $ftxDoc->addChild('C_C107')
+            ->addChild('D_4441', 'P1');
+        $ftxDoc->addChild('C_C108')
+            ->addChild('D_4440', 'urn:cen.eu:en16931:2017');
 
         // Payment purpose
-        $paymentType = $mInvoice->addChild('S_FTX');
-        $paymentType->addChild('D_4451', 'ALQ');
-        $paymentType->addChild('C_C108')
-            ->addChild('D_4440', $this->payment_purpose);
+        $paymentPurpose = $mInvoice->addChild('S_FTX');
+        $paymentPurpose->addChild('D_4451', 'ALQ');
+        $paymentPurpose->addChild('C_C108')
+            ->addChild('D_4440', $this->paymentPurpose);
 
         // Payment reference
-        if ($this->payment_reference !== null) {
+        if ($this->paymentReference !== null) {
             $reference = $mInvoice->addChild('G_SG1')
                 ->addChild('S_RFF')
                 ->addChild('C_C506');
             $reference->addChild('D_1153', 'PQ');
-            $reference->addChild('D_1154', $this->payment_reference);
+            $reference->addChild('D_1154', $this->paymentReference);
         }
 
         // Reference documents
-        foreach ($this->reference_documents as $doc) {
+        foreach ($this->referenceDocuments as $doc) {
             $ref = $mInvoice->addChild('G_SG1')
                 ->addChild('S_RFF')
                 ->addChild('C_C506');
@@ -340,11 +348,11 @@ class Invoice
             $ref->addChild('D_1154', $doc->document_number);
         }
 
-        $issuer = $mInvoice->addChild('G_SG2');
-        XMLHelpers::append($issuer, $this->issuer->generateXml('SE'));
-
         $recipient = $mInvoice->addChild('G_SG2');
         XMLHelpers::append($recipient, $this->recipient->generateXml('BY'));
+
+        $issuer = $mInvoice->addChild('G_SG2');
+        XMLHelpers::append($issuer, $this->issuer->generateXml('SE'));
 
         // Currency
         $currency = $mInvoice->addChild('G_SG7')
@@ -353,17 +361,20 @@ class Invoice
         $currency->addChild('D_6347', '2');
         $currency->addChild('D_6345', $this->currency);
 
-//        'payment_terms': construct_payment_terms_data(invoice.date_due_code, invoice.date_due),
+        // Payment terms
         $paymentTerms = $mInvoice->addChild('G_SG8');
         $paymentTerms->addChild('S_PAT')
             ->addChild('D_4279', 1);
         $paymentTermsDueDate = $paymentTerms->addChild('S_DTM')
             ->addChild('C_C507');
-        $paymentTermsDueDate->addChild('D_2005', $this->date_due_code);
-        $paymentTermsDueDate->addChild('D_2380', $this->date_due->format('Y-m-d'));
+        $paymentTermsDueDate->addChild('D_2005', $this->dateDueCode);
+        $paymentTermsDueDate->addChild('D_2380', $this->dateDue->format('Y-m-d'));
+        $paymentTerms->addChild('S_PAI')
+            ->addChild('C_C534')
+            ->addChild('D_4461', 1);
 
         // Global discount
-        if ($this->global_discount_amount) {
+        if ($this->globalDiscountAmount) {
             $discount = $mInvoice->addChild('G_SG16');
 
             $discount->addChild('S_ALC');
@@ -376,21 +387,21 @@ class Invoice
                 ->addChild('S_PCD')
                 ->addChild('C_C501');
             $discountPercentage->addChild('D_5245', 1);
-            $discountPercentage->addChild('D_5482', $this->global_discount_percentage);
+            $discountPercentage->addChild('D_5482', $this->globalDiscountPercentage);
 
             $discountAmount = $discount->addChild('G_SG20')
                 ->addChild('S_MOA')
                 ->addChild('C_C516');
             $discountAmount->addChild('D_5025', 1);
-            $discountAmount->addChild('D_5004', $this->global_discount_amount);
+            $discountAmount->addChild('D_5004', $this->globalDiscountAmount);
         }
 
         // if invoice.intro_text:
         //  data['invoice']['intro_text'] = construct_custom_text_data('GEN', invoice.intro_text)
 
-        foreach ($this->document_items as $line => $item) {
+        foreach ($this->items as $line => $item) {
             $line = $mInvoice->addChild('G_SG26');
-            XMLHelpers::append($line, $item->generateXml($line + 1));
+            XMLHelpers::append($line, $item->generateXml());
         }
 
         // Payment data
@@ -398,20 +409,20 @@ class Invoice
             ->addChild('S_MOA')
             ->addChild('C_C516');
         $paymentData->addChild('D_5025', 9);
-        $paymentData->addChild('D_5004', $this->total_with_tax);
+        $paymentData->addChild('D_5004', $this->totalWithTax);
 
         // Total without discount
-        $this->xmlSumsData($mInvoice, $this->total_without_discount, '79');
+        $this->xmlSumsData($mInvoice, $this->totalWithoutDiscount, '79');
         // Discounts amount
-        $this->xmlSumsData($mInvoice, $this->total_without_discount - $this->total_without_tax, '260');
+        $this->xmlSumsData($mInvoice, $this->totalWithoutDiscount - $this->totalWithoutTax, '260');
         // Tax base sums
-        $this->xmlSumsData($mInvoice, $this->total_without_tax, '389');
+        $this->xmlSumsData($mInvoice, $this->totalWithoutTax, '389');
         // Taxes amount
-        $this->xmlSumsData($mInvoice, $this->total_with_tax - $this->total_without_tax, '176');
+        $this->xmlSumsData($mInvoice, $this->totalWithTax - $this->totalWithoutTax, '176');
         // Total amount - with taxes
-        $this->xmlSumsData($mInvoice, $this->total_with_tax, '388');
+        $this->xmlSumsData($mInvoice, $this->totalWithTax, '388');
 
-        foreach ($this->tax_summaries as $taxSummary) {
+        foreach ($this->taxSummaries as $taxSummary) {
             $tax = $mInvoice->addChild('G_SG52');
             XMLHelpers::append($tax, $taxSummary->generateXml());
         }

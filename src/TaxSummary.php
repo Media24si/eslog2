@@ -47,18 +47,18 @@ class TaxSummary
         $tax->addChild('C_C241')
             ->addChild('D_5153', 'VAT');
         $tax->addChild('C_C243')
-            ->addChild('D_5278', $this->rate);
+            ->addChild('D_5278', round($this->rate, 2));
         $tax->addChild('D_5305', $this->type);
 
         $amount = $xml->addChild('S_MOA')
             ->addChild('C_C516');
         $amount->addChild('D_5025', '125');
-        $amount->addChild('D_5004', $this->base);
+        $amount->addChild('D_5004', round($this->base, 2));
 
         $amount_tax = $xml->addChild('S_MOA')
             ->addChild('C_C516');
         $amount_tax->addChild('D_5025', '124');
-        $amount_tax->addChild('D_5004', $this->amount);
+        $amount_tax->addChild('D_5004', round($this->amount, 2));
 
         return $xml;
     }

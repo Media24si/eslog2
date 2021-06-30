@@ -55,7 +55,7 @@ class InvoiceTest extends TestCase
             ->addItem(
                 (new InvoiceItem())
                     ->setRowNumber(1)
-                    ->setItemName('Acme 0.33L')
+                    ->setName('Acme 0.33L')
                     ->setQuantity(2)
                     ->setPriceWithoutTax(0.82)
                     ->setTotalWithTax(1.81)

@@ -7,13 +7,17 @@ class Business
     public string $name;
     public string $address;
     public string $city;
-    public string $zip_code;
+    public string $zipCode;
     public string $country;
-    public string $country_iso_code;
+    public string $countryIsoCode;
     public string $iban;
-    public string $bic;
-    public string $registration_number;
-    public string $vat_id;
+    public string $bic = '';
+    public string $bankTitle = '';
+    public string $registrationNumber;
+    public string $vatId;
+
+    public string $phone = '';
+    public string $email = '';
 
     public function setName(string $name): Business
     {
@@ -36,9 +40,9 @@ class Business
         return $this;
     }
 
-    public function setZipCode(string $zip_code): Business
+    public function setZipCode(string $zipCode): Business
     {
-        $this->zip_code = $zip_code;
+        $this->zipCode = $zipCode;
 
         return $this;
     }
@@ -50,9 +54,9 @@ class Business
         return $this;
     }
 
-    public function setCountryIsoCode(string $country_iso_code): Business
+    public function setCountryIsoCode(string $countryIsoCode): Business
     {
-        $this->country_iso_code = $country_iso_code;
+        $this->countryIsoCode = $countryIsoCode;
 
         return $this;
     }
@@ -71,16 +75,30 @@ class Business
         return $this;
     }
 
-    public function setRegistrationNumber(string $registration_number): Business
+    public function setRegistrationNumber(string $registrationNumber): Business
     {
-        $this->registration_number = $registration_number;
+        $this->registrationNumber = $registrationNumber;
 
         return $this;
     }
 
-    public function setVatId(string $vat_id): Business
+    public function setVatId(string $vatId): Business
     {
-        $this->vat_id = $vat_id;
+        $this->vatId = $vatId;
+
+        return $this;
+    }
+
+    public function setPhone(string $phone): Business
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
+
+    public function setEmail(string $email): Business
+    {
+        $this->email = $email;
 
         return $this;
     }
@@ -101,31 +119,74 @@ class Business
             ->addChild('D_3042', mb_substr($this->address, 0, 35));
 
         $nad->addChild('D_3164', $this->city);
-        $nad->addChild('D_3251', $this->zip_code);
-        $nad->addChild('D_3207', $this->country_iso_code);
+
+        $nad->addChild('C_C819')
+            ->addChild('D_3228', $this->country);
+        $nad->addChild('D_3251', $this->zipCode);
+        $nad->addChild('D_3207', $this->countryIsoCode);
 
         // IBAN
         $fii = $xml->addChild('S_FII');
         $fii->addChild('D_3035', $type === 'SE' ? 'RB' : 'BB');
-        $fii->addChild('C_C078')
-            ->addChild('D_3194', $this->iban);
-        $fii->addChild('C_C088')
-            ->addChild('D_3433', $this->bic);
+        $c078 = $fii->addChild('C_C078');
+        $c078->addChild('D_3194', $this->iban);
+        if ($this->bankTitle) {
+            $c078->addChild('D_3192', $this->bankTitle);
+        }
+
+        if ($this->bic) {
+            $fii->addChild('C_C088')
+                ->addChild('D_3433', $this->bic);
+        }
 
         // VAT
         $vat = $xml->addChild('G_SG3')
             ->addChild('S_RFF')
             ->addChild('C_C506');
+        $vat->addChild('D_1153', 'VA');
+        $vat->addChild('D_1154', $this->vatId);
+        $vat = $xml->addChild('G_SG3')
+            ->addChild('S_RFF')
+            ->addChild('C_C506');
         $vat->addChild('D_1153', 'AHP');
-        $vat->addChild('D_1154', $this->vat_id);
+        $vat->addChild('D_1154', $this->vatId);
 
         // Registration number
         $vat = $xml->addChild('G_SG3')
             ->addChild('S_RFF')
             ->addChild('C_C506');
         $vat->addChild('D_1153', '0199');
-        $vat->addChild('D_1154', $this->registration_number);
+        $vat->addChild('D_1154', $this->registrationNumber);
+
+        // Contact
+        if ($this->phone || $this->email) {
+            $contact = $xml->addChild('G_SG5');
+            $contact->addChild('S_CTA')
+                ->addChild('D_3139', $type === 'SE' ? 'SU' : 'PD');
+
+
+            if ($this->phone) {
+                $p = $contact->addChild('S_COM')
+                    ->addChild('C_C076');
+                $p->addChild('D_3148', $this->phone);
+                $p->addChild('D_3155', 'TE');
+            }
+
+            if ($this->email) {
+                $e = $contact->addChild('S_COM')
+                    ->addChild('C_C076');
+                $e->addChild('D_3148', $this->email);
+                $e->addChild('D_3155', 'EM');
+            }
+        }
 
         return $xml;
+    }
+
+    public function setBankTitle(string $bankTitle): Business
+    {
+        $this->bankTitle = $bankTitle;
+
+        return $this;
     }
 }

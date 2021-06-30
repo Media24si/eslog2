@@ -4,36 +4,39 @@ namespace Media24si\eSlog2;
 
 class InvoiceItem
 {
-    public int $row_number;
-    public string $item_name;
+    public const UNIT_UNIT = 'C62';
+    public const UNIT_PIECE = 'H87';
+
+    public int $rowNumber;
+    public string $name;
+    public string $description = '';
     public float $quantity;
-    public float $price_without_tax;
+    public float $priceWithoutTax;
 
-    public float $total_with_tax;      # total - after discount and tax
-    public float $total_without_tax;   # total - after discount
+    public float $totalWithTax;      # total - after discount and tax
+    public float $totalWithoutTax;   # total - after discount
 
-    public float $discount_percentage;
-    public float $discount_amount;
+    public float $discountPercentage = 0;
+    public float $discountAmount = 0;
 
-    public float $tax_rate;
-    public string $tax_rate_type = 'S';
+    public float $taxRate;
+    public string $taxRateType = 'S';
 
-    public string $unit = 'PCE';
+    public string $unit = self::UNIT_UNIT;
     public string $ean = '';
 
-    public string $item_description_code = 'F';
-    public int $quantity_type = 47;
+    public int $quantityType = 47;
 
-    public function setRowNumber(int $row_number): InvoiceItem
+    public function setRowNumber(int $rowNumber): InvoiceItem
     {
-        $this->row_number = $row_number;
+        $this->rowNumber = $rowNumber;
 
         return $this;
     }
 
-    public function setItemName(string $item_name): InvoiceItem
+    public function setName(string $name): InvoiceItem
     {
-        $this->item_name = $item_name;
+        $this->name = $name;
 
         return $this;
     }
@@ -45,51 +48,51 @@ class InvoiceItem
         return $this;
     }
 
-    public function setPriceWithoutTax(float $price_without_tax): InvoiceItem
+    public function setPriceWithoutTax(float $priceWithoutTax): InvoiceItem
     {
-        $this->price_without_tax = $price_without_tax;
+        $this->priceWithoutTax = $priceWithoutTax;
 
         return $this;
     }
 
-    public function setTotalWithTax(float $total_with_tax): InvoiceItem
+    public function setTotalWithTax(float $totalWithTax): InvoiceItem
     {
-        $this->total_with_tax = $total_with_tax;
+        $this->totalWithTax = $totalWithTax;
 
         return $this;
     }
 
-    public function setTotalWithoutTax(float $total_without_tax): InvoiceItem
+    public function setTotalWithoutTax(float $totalWithoutTax): InvoiceItem
     {
-        $this->total_without_tax = $total_without_tax;
+        $this->totalWithoutTax = $totalWithoutTax;
 
         return $this;
     }
 
-    public function setDiscountPercentage(float $discount_percentage): InvoiceItem
+    public function setDiscountPercentage(float $discountPercentage): InvoiceItem
     {
-        $this->discount_percentage = $discount_percentage;
+        $this->discountPercentage = $discountPercentage;
 
         return $this;
     }
 
-    public function setDiscountAmount(float $discount_amount): InvoiceItem
+    public function setDiscountAmount(float $discountAmount): InvoiceItem
     {
-        $this->discount_amount = $discount_amount;
+        $this->discountAmount = $discountAmount;
 
         return $this;
     }
 
-    public function setTaxRate(float $tax_rate): InvoiceItem
+    public function setTaxRate(float $taxRate): InvoiceItem
     {
-        $this->tax_rate = $tax_rate;
+        $this->taxRate = $taxRate;
 
         return $this;
     }
 
-    public function setTaxRateType(float $tax_rate_type): InvoiceItem
+    public function setTaxRateType(float $taxRateType): InvoiceItem
     {
-        $this->tax_rate_type = $tax_rate_type;
+        $this->taxRateType = $taxRateType;
 
         return $this;
     }
@@ -108,63 +111,77 @@ class InvoiceItem
         return $this;
     }
 
-    public function setItemDescriptionCode(string $item_description_code): InvoiceItem
+    public function setQuantityType(int $quantityType): InvoiceItem
     {
-        $this->item_description_code = $item_description_code;
+        $this->quantityType = $quantityType;
 
         return $this;
     }
 
-    public function setQuantityType(int $quantity_type): InvoiceItem
+    public function setDescription(string $description): InvoiceItem
     {
-        $this->quantity_type = $quantity_type;
+        $this->description = $description;
 
         return $this;
     }
 
-    public function generateXml(int $line): \SimpleXMLElement
+    public function generateXml(): \SimpleXMLElement
     {
         $xml = new \SimpleXMLElement('<G_SG26></G_SG26>');
 
         $sLine = $xml->addChild('S_LIN');
-        $sLine->addChild('D_1082', $line);
+        $sLine->addChild('D_1082', $this->rowNumber);
         if ($this->ean) {
             $ean = $sLine->addChild('C_C212');
             $ean->addChild('D_7140', $this->ean);
             $ean->addChild('D_7143', '0160');
         }
 
-        // Description
+        // Item name
         $desc = $xml->addChild('S_IMD');
-        $desc->addChild('D_7077', $this->item_description_code);
+        $desc->addChild('D_7077', 'F');
         $desc->addChild('C_C273')
-            ->addChild('D_7008', mb_substr($this->item_name, 0, 35));
+            ->addChild('D_7008', mb_substr($this->name, 0, 35));
+
+        // Item description
+        if ($this->description) {
+            $desc = $xml->addChild('S_IMD');
+            $desc->addChild('D_7077', 'A');
+            $desc->addChild('C_C273')
+                ->addChild('D_7008', mb_substr($this->description, 0, 256));
+        }
 
         // Quantity
         $qnt = $xml->addChild('S_QTY')
             ->addChild('C_C186');
-        $qnt->addChild('D_6063', $this->quantity_type);
-        $qnt->addChild('D_6060', $this->quantity);
+        $qnt->addChild('D_6063', $this->quantityType);
+        $qnt->addChild('D_6060', round($this->quantity, 2));
         $qnt->addChild('D_6411', $this->unit);
 
-        // Value before discount
-        $vbd = $xml->addChild('G_SG29')
-            ->addChild('S_MOA')
-            ->addChild('C_C516');
-        $vbd->addChild('D_5025', '203');
-        $vbd->addChild('D_5004', round($this->price_without_tax * $this->quantity, 2));
-
         // Value total
-        $vbd = $xml->addChild('G_SG29')
+        $vbd = $xml->addChild('G_SG27')
             ->addChild('S_MOA')
             ->addChild('C_C516');
         $vbd->addChild('D_5025', '38');
-        $vbd->addChild('D_5004', $this->total_with_tax);
+        $vbd->addChild('D_5004', round($this->totalWithTax, 2));
+
+        $taxAmount = $xml->addChild('G_SG27')
+            ->addChild('S_MOA')
+            ->addChild('C_C516');
+        $taxAmount->addChild('D_5025', '203');
+        $taxAmount->addChild('D_5004', round($this->totalWithoutTax, 2));
+
+        // Value before discount
+//        $vbd = $xml->addChild('G_SG29')
+//            ->addChild('S_PRI')
+//            ->addChild('C_C516');
+//        $vbd->addChild('D_5025', '203');
+//        $vbd->addChild('D_5004', round($this->price_without_tax * $this->quantity, 2));
 
         // Price without tax
-        $priceWoTax = $this->price_without_tax;
-        if ($this->discount_percentage) {
-            $priceWoTax = $priceWoTax * (1 - ($this->discount_percentage / 100));
+        $priceWoTax = $this->priceWithoutTax;
+        if ($this->discountPercentage) {
+            $priceWoTax = $priceWoTax * (1 - ($this->discountPercentage / 100));
         }
 
         $woTax = $xml->addChild('G_SG29')
@@ -175,12 +192,12 @@ class InvoiceItem
         $woTax->addChild('D_5284', 1);
         $woTax->addChild('D_6411', 'C62');
 
-        if ($this->discount_percentage) {
+        if ($this->discountPercentage) {
             $priceWoDiscount = $xml->addChild('G_SG29')
                 ->addChild('S_PRI')
                 ->addChild('C_C509');
             $priceWoDiscount->addChild('D_5125', 'AAB');
-            $priceWoDiscount->addChild('D_5118', $this->price_without_tax);
+            $priceWoDiscount->addChild('D_5118', round($this->priceWithoutTax, 2));
             $priceWoDiscount->addChild('D_5284', 1);
             $priceWoDiscount->addChild('D_6411', 'C62');
         }
@@ -192,20 +209,20 @@ class InvoiceItem
         $taxes->addChild('C_C241')
             ->addChild('D_5153', 'VAT');
         $taxes->addChild('C_C243')
-            ->addChild('D_5278', $this->tax_rate);
-        $taxes->addChild('D_5305', $this->tax_rate_type);
-
-        $taxAmount = $tax->addChild('S_MOA')
-            ->addChild('C_C516');
-        $taxAmount->addChild('D_5025', '125');
-        $taxAmount->addChild('D_5004', $this->total_without_tax);
+            ->addChild('D_5278', round($this->taxRate, 2));
+        $taxes->addChild('D_5305', $this->taxRateType);
 
         $taxAmount = $tax->addChild('S_MOA')
             ->addChild('C_C516');
         $taxAmount->addChild('D_5025', '124');
-        $taxAmount->addChild('D_5004', $this->total_with_tax - $this->total_without_tax);
+        $taxAmount->addChild('D_5004', round($this->totalWithTax - $this->totalWithoutTax, 2));
 
-        if ($this->discount_percentage) {
+        $taxAmount = $tax->addChild('S_MOA')
+            ->addChild('C_C516');
+        $taxAmount->addChild('D_5025', '125');
+        $taxAmount->addChild('D_5004', round($this->totalWithoutTax, 2));
+
+        if ($this->discountPercentage) {
             $sg39 = $xml->addChild('G_SG39');
             $sg39->addChild('S_ALC')
                 ->addChild('D_5463', 'A');
@@ -214,13 +231,13 @@ class InvoiceItem
                 ->addChild('S_PCD')
                 ->addChild('C_C501');
             $percentage->addChild('D_5245', 1);
-            $percentage->addChild('D_5482', $this->discount_percentage);
+            $percentage->addChild('D_5482', $this->discountPercentage);
 
             $amount = $sg39->addChild('G_SG42')
                 ->addChild('S_MOA')
                 ->addChild('C_C516');
             $amount->addChild('D_5025', '204');
-            $amount->addChild('D_5004', $this->discount_amount);
+            $amount->addChild('D_5004', round($this->discountAmount, 2));
         }
 
         return $xml;
