@@ -2,10 +2,7 @@
 
 namespace Media24si\eSlog2\Envelope;
 
-use Illuminate\Support\Str;
 use Media24si\eSlog2\Business;
-
-use function Complex\theta;
 
 class Hal extends Envelope
 {
@@ -86,7 +83,7 @@ class Hal extends Envelope
 
             $attachments->addChild('size', $sumSize);
         }
-        
+
         return $xml;
     }
 
