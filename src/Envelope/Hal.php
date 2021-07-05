@@ -2,7 +2,10 @@
 
 namespace Media24si\eSlog2\Envelope;
 
+use Illuminate\Support\Str;
 use Media24si\eSlog2\Business;
+
+use function Complex\theta;
 
 class Hal extends Envelope
 {
@@ -38,6 +41,8 @@ class Hal extends Envelope
         $xml->addChild('timestamp', (new \DateTime())->format('Y-m-d\TH:i:s'));
 
         $envelope = $xml->addChild('envelope');
+        $envelope->addAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance', 'http://www.w3.org/2001/XMLSchema-instance');
+        $envelope->addAttribute('xsi:noNamespaceSchemaLocation', 'icl_eb_envelope_einvoice.xsd', 'http://www.w3.org/2001/XMLSchema-instance');
 
         $this->addSenderReceiver($envelope, 'sender', $this->issuer);
         $this->addSenderReceiver($envelope, 'receiver', $this->recipient);
@@ -55,6 +60,7 @@ class Hal extends Envelope
         $this->addCreditorDebtor($paymentData, 'creditor', $this->issuer);
         $this->addCreditorDebtor($paymentData, 'debtor', $this->recipient);
 
+        $paymentData->addChild('requested_execution_date', $this->deadline->format('Y-m-d'));
         $paymentData->addChild('amount', $this->amount);
         $paymentData->addChild('currency', $this->currency);
 
@@ -64,14 +70,12 @@ class Hal extends Envelope
 
         $paymentData->addChild('purpose', 'COST');
 
-        if(count($this->attachemnts)) {
+        if (count($this->attachemnts)) {
             $attachments = $envelope->addChild('attachments');
-            $attachments->addChild('hash', '0000000000000000000000000000000000000000');
             $attachments->addChild('count', count($this->attachemnts));
 
             $sumSize = 0;
-            foreach ($this->attachemnts as $attach)
-            {
+            foreach ($this->attachemnts as $attach) {
                 $attachment = $attachments->addChild('attachment');
                 $attachment->addChild('filename', $attach->filename);
                 $attachment->addChild('size', $attach->size);
@@ -82,7 +86,7 @@ class Hal extends Envelope
 
             $attachments->addChild('size', $sumSize);
         }
-
+        
         return $xml;
     }
 
@@ -93,12 +97,12 @@ class Hal extends Envelope
         $entity->addChild('country', $who->countryIsoCode);
         $entity->addChild('address', $who->address);
         $entity->addChild('address', $who->zipCode . ' ' . $who->city);
-        $entity->addChild('sender_identifier', $who->vatId);
+        $entity->addChild($type . '_identifier', $who->vatId);
         $entity->addChild('phone', $who->phone);
 
-        $entityEddress = $entity->addChild('sender_eddress');
-        $entityEddress->addChild('agent', $who->bic);
-        $entityEddress->addChild('sender_mailbox', $who->iban);
+        $entityEddress = $entity->addChild($type . '_eddress');
+        $entityEddress->addChild($type . '_agent', str_pad($who->bic, 11, 'X', STR_PAD_RIGHT));
+        $entityEddress->addChild($type . '_mailbox', $who->iban);
     }
 
     private function addCreditorDebtor(\SimpleXMLElement &$paymentData, $type, Business $who)
@@ -109,7 +113,7 @@ class Hal extends Envelope
         $entity->addChild('address', $who->address);
         $entity->addChild('address', $who->zipCode . ' ' . $who->city);
         $entity->addChild('identification');
-        $entity->addChild('creditor_agent', $who->bic);
-        $entity->addChild('creditor_account', $who->iban);
+        $entity->addChild($type . '_agent', str_pad($who->bic, 11, 'X', STR_PAD_RIGHT));
+        $entity->addChild($type . '_account', $who->iban);
     }
 }

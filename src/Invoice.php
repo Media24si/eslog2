@@ -47,7 +47,7 @@ class Invoice
     public string $locationAddress;
 
     public \DateTime $dateIssued;
-    public \DateTime $dateOfService;
+    public ?\DateTime $dateOfService = null;
     public \DateTime $dateDue;
 
     public string $paymentReference;
@@ -305,10 +305,12 @@ class Invoice
         $dateIssues->addChild('D_2380', $this->dateIssued->format('Y-m-d'));
 
         // Date Of service
-        $dateIssues = $mInvoice->addChild('S_DTM')
-            ->addChild('C_C507');
-        $dateIssues->addChild('D_2005', $this->dateOfServiceCode);
-        $dateIssues->addChild('D_2380', $this->dateOfService->format('Y-m-d'));
+        if ($this->dateOfService) {
+            $dateIssues = $mInvoice->addChild('S_DTM')
+                ->addChild('C_C507');
+            $dateIssues->addChild('D_2005', $this->dateOfServiceCode);
+            $dateIssues->addChild('D_2380', $this->dateOfService->format('Y-m-d'));
+        }
 
         // Payment type
         $paymentType = $mInvoice->addChild('S_FTX');

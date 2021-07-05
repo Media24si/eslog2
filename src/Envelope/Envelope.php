@@ -18,6 +18,7 @@ abstract class Envelope
     public string $paymentReference;
 
     public \DateTime $dateIssued;
+    public \DateTime $deadline;
 
     public abstract function generateXml(): \SimpleXMLElement;
 
@@ -31,6 +32,7 @@ abstract class Envelope
 
         $this->paymentReference = $invoice->paymentReference;
         $this->dateIssued = $invoice->dateIssued;
+        $this->deadline = $invoice->dateDue;
 
         return $this;
     }
