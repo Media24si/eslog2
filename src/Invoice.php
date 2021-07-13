@@ -79,6 +79,8 @@ class Invoice
 
     public array $taxSummaries = [];
 
+    public $devNotes;
+
     public function setIssuer(Business $issuer): Invoice
     {
         $this->issuer = $issuer;
@@ -443,5 +445,12 @@ class Invoice
 
         $sum->addChild('D_5025', $type);
         $sum->addChild('D_5004', round($amount, 2));
+    }
+
+    public function setDevNotes($notes): Invoice
+    {
+        $this->devNotes = $notes;
+
+        return $this;
     }
 }
