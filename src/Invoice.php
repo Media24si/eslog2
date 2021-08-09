@@ -50,8 +50,6 @@ class Invoice
     public ?\DateTime $dateOfService = null;
     public \DateTime $dateDue;
 
-    public string $paymentReference;
-
     public ?float $globalDiscountAmount = null;
     public ?float $globalDiscountPercentage = null;
 
@@ -71,6 +69,9 @@ class Invoice
     public int $dateOfServiceCode = 35;
     public int $dateDueCode = 13;
 
+    /**
+     * @var array<ReferenceDocument>
+     */
     public array $referenceDocuments = [];
 
     public array $items = [];
@@ -140,13 +141,6 @@ class Invoice
     public function setDateDue(\DateTime $dateDue): Invoice
     {
         $this->dateDue = $dateDue;
-
-        return $this;
-    }
-
-    public function setPaymentReference(string $paymentReference): Invoice
-    {
-        $this->paymentReference = $paymentReference;
 
         return $this;
     }
@@ -263,6 +257,17 @@ class Invoice
         return $this;
     }
 
+    public function getReferenceDocument(string $typeCode): ?ReferenceDocument
+    {
+        foreach ($this->referenceDocuments as $doc) {
+            if ($doc->typeCode === $typeCode) {
+                return $doc;
+            }
+        }
+
+        return null;
+    }
+
     public function addItem(InvoiceItem $item): Invoice
     {
         $this->items[] = $item;
@@ -334,22 +339,10 @@ class Invoice
         $paymentPurpose->addChild('C_C108')
             ->addChild('D_4440', $this->paymentPurpose);
 
-        // Payment reference
-        if ($this->paymentReference !== null) {
-            $reference = $mInvoice->addChild('G_SG1')
-                ->addChild('S_RFF')
-                ->addChild('C_C506');
-            $reference->addChild('D_1153', 'PQ');
-            $reference->addChild('D_1154', $this->paymentReference);
-        }
-
         // Reference documents
         foreach ($this->referenceDocuments as $doc) {
-            $ref = $mInvoice->addChild('G_SG1')
-                ->addChild('S_RFF')
-                ->addChild('C_C506');
-            $ref->addChild('D_1153', $doc->type_code);
-            $ref->addChild('D_1154', $doc->document_number);
+            $refDoc = $mInvoice->addChild('G_SG1');
+            XMLHelpers::append($refDoc, $doc->generateXml());
         }
 
         $recipient = $mInvoice->addChild('G_SG2');
@@ -400,9 +393,6 @@ class Invoice
             $discountAmount->addChild('D_5004', $this->globalDiscountAmount);
         }
 
-        // if invoice.intro_text:
-        //  data['invoice']['intro_text'] = construct_custom_text_data('GEN', invoice.intro_text)
-
         foreach ($this->items as $line => $item) {
             $line = $mInvoice->addChild('G_SG26');
             XMLHelpers::append($line, $item->generateXml());
@@ -430,9 +420,6 @@ class Invoice
             $tax = $mInvoice->addChild('G_SG52');
             XMLHelpers::append($tax, $taxSummary->generateXml());
         }
-
-        // if invoice.outro_text:
-        //  data['invoice']['outro_text'] = construct_custom_text_data('GEN', invoice.outro_text)
 
         return $xml;
     }
