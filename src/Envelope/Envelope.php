@@ -31,7 +31,9 @@ abstract class Envelope
         $this->amount = $invoice->totalWithTax;
         $this->currency = $invoice->currency;
 
-        $this->paymentReference = $invoice->getReferenceDocument(ReferenceDocument::TYPE_PAYMENT_REFERENCE);
+        $reference = $invoice->getReferenceDocument(ReferenceDocument::TYPE_PAYMENT_REFERENCE);
+        $this->paymentReference = $reference->documentNumber;
+        
         $this->dateIssued = $invoice->dateIssued;
         $this->deadline = $invoice->dateDue;
 
