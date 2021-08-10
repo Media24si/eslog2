@@ -59,8 +59,6 @@ class Invoice
     public int $invoiceType = self::TYPE_INVOICE;
     public string $currency = 'EUR';
     public int $invoiceFunction = self::FUNCTION_ORIGINAL;
-    public int $paymentType = self::PAYMENT_REQUIRED;
-    public string $paymentPurpose = 'GDSV';
     public ?string $additionalRemittanceInformation = null;
 
     public int $locationCode = self::LOCATION_ISSUED;
@@ -68,6 +66,11 @@ class Invoice
     public int $dateIssuedCode = 137;
     public int $dateOfServiceCode = 35;
     public int $dateDueCode = 13;
+
+    /**
+     * @var array<FreeText>
+     */
+    public array $freeText = [];
 
     /**
      * @var array<ReferenceDocument>
@@ -194,20 +197,6 @@ class Invoice
         return $this;
     }
 
-    public function setPaymentType(int $paymentType): Invoice
-    {
-        $this->paymentType = $paymentType;
-
-        return $this;
-    }
-
-    public function setPaymentPurpose(string $paymentPurpose): Invoice
-    {
-        $this->paymentPurpose = $paymentPurpose;
-
-        return $this;
-    }
-
     public function setAdditionalRemittanceInformation(?string $additionalRemittanceInformation): Invoice
     {
         $this->additionalRemittanceInformation = $additionalRemittanceInformation;
@@ -268,6 +257,24 @@ class Invoice
         return null;
     }
 
+    public function addFreeText(FreeText $freeText): Invoice
+    {
+        $this->freeText[] = $freeText;
+
+        return $this;
+    }
+
+    public function getFreeText(string $textCode): ?FreeText
+    {
+        foreach ($this->freeText as $text) {
+            if ($text->textCode === $textCode) {
+                return $text;
+            }
+        }
+
+        return null;
+    }
+
     public function addItem(InvoiceItem $item): Invoice
     {
         $this->items[] = $item;
@@ -319,25 +326,11 @@ class Invoice
             $dateIssues->addChild('D_2380', $this->dateOfService->format('Y-m-d'));
         }
 
-        // Payment type
-        $paymentType = $mInvoice->addChild('S_FTX');
-        $paymentType->addChild('D_4451', 'PAI');
-        $paymentType->addChild('C_C108')
-            ->addChild('D_4440', $this->paymentType);
-
-        // Doc
-        $ftxDoc = $mInvoice->addChild('S_FTX');
-        $ftxDoc->addChild('D_4451', 'DOC');
-        $ftxDoc->addChild('C_C107')
-            ->addChild('D_4441', 'P1');
-        $ftxDoc->addChild('C_C108')
-            ->addChild('D_4440', 'urn:cen.eu:en16931:2017');
-
-        // Payment purpose
-        $paymentPurpose = $mInvoice->addChild('S_FTX');
-        $paymentPurpose->addChild('D_4451', 'ALQ');
-        $paymentPurpose->addChild('C_C108')
-            ->addChild('D_4440', $this->paymentPurpose);
+        // Free text
+        foreach ($this->freeText as $text) {
+            $ftx = $mInvoice->addChild('S_FTX');
+            XMLHelpers::append($ftx, $text->generateXml());
+        }
 
         // Reference documents
         foreach ($this->referenceDocuments as $doc) {
