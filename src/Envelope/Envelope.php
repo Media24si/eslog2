@@ -4,6 +4,7 @@ namespace Media24si\eSlog2\Envelope;
 
 use Media24si\eSlog2\Business;
 use Media24si\eSlog2\Invoice;
+use Media24si\eSlog2\ReferenceDocument;
 
 abstract class Envelope
 {
@@ -30,7 +31,9 @@ abstract class Envelope
         $this->amount = $invoice->totalWithTax;
         $this->currency = $invoice->currency;
 
-        $this->paymentReference = $invoice->paymentReference;
+        $reference = $invoice->getReferenceDocument(ReferenceDocument::TYPE_PAYMENT_REFERENCE);
+        $this->paymentReference = $reference->documentNumber;
+        
         $this->dateIssued = $invoice->dateIssued;
         $this->deadline = $invoice->dateDue;
 
