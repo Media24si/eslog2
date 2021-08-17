@@ -40,7 +40,7 @@ class Business
         return $this;
     }
 
-    public function setZipCode(string $zipCode): Business
+    public function setZipCode(?string $zipCode): Business
     {
         $this->zipCode = $zipCode;
 
@@ -122,8 +122,10 @@ class Business
 
         $nad->addChild('C_C819')
             ->addChild('D_3228', $this->country);
-        $nad->addChild('D_3251', $this->zipCode);
         $nad->addChild('D_3207', $this->countryIsoCode);
+        if ($this->zipCode != null) {
+           $nad->addChild('D_3251', $this->zipCode);
+        }
 
         // IBAN
         $fii = $xml->addChild('S_FII');

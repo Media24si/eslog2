@@ -71,6 +71,7 @@ class ReferenceDocument
         $ref = $xml->addChild('S_RFF')
             ->addChild('C_C506');
         $ref->addChild('D_1153', $this->typeCode);
+
         if ($this->documentNumber) {
             $ref->addChild('D_1154', $this->documentNumber);
         }
