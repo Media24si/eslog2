@@ -13,6 +13,9 @@ class InvoiceItem
     public float $quantity;
     public float $priceWithoutTax;
 
+    public float $itemPrice;
+    public float $itemPriceWithTax;
+
     public float $totalWithTax;      # total - after discount and tax
     public float $totalWithoutTax;   # total - after discount
 
@@ -44,6 +47,20 @@ class InvoiceItem
     public function setQuantity(float $quantity): InvoiceItem
     {
         $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    public function setItemPrice(float $itemPrice): InvoiceItem
+    {
+        $this->itemPrice = $itemPrice;
+
+        return $this;
+    }
+
+    public function setItemPriceWithTax(float $itemPriceWithTax): InvoiceItem
+    {
+        $this->itemPriceWithTax = $itemPriceWithTax;
 
         return $this;
     }
