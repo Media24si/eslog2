@@ -15,6 +15,7 @@ class Business
     public string $bankTitle = '';
     public string $registrationNumber;
     public string $vatId;
+    public string $internalIdentifier = '';
 
     public string $phone = '';
     public string $email = '';
@@ -89,6 +90,13 @@ class Business
         return $this;
     }
 
+    public function setInternalIdentifier(string $internalIdentifier): Business
+    {
+        $this->internalIdentifier = $internalIdentifier;
+
+        return $this;
+    }
+
     public function setPhone(string $phone): Business
     {
         $this->phone = $phone;
@@ -152,6 +160,15 @@ class Business
             ->addChild('C_C506');
         $vat->addChild('D_1153', 'AHP');
         $vat->addChild('D_1154', $this->vatId);
+
+        // Internal identifier
+        if ($this->internalIdentifier) {
+            $identifier = $xml->addChild('G_SG3')
+            ->addChild('S_RFF')
+            ->addChild('C_C506');
+            $identifier->addChild('D_1153', 'CR');
+            $identifier->addChild('D_1154', $this->internalIdentifier);
+        }
 
         // Registration number
         $vat = $xml->addChild('G_SG3')
