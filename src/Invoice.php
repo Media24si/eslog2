@@ -361,7 +361,7 @@ class Invoice
         $paymentTermsDueDate->addChild('D_2380', $this->dateDue->format('Y-m-d'));
         $paymentTerms->addChild('S_PAI')
             ->addChild('C_C534')
-            ->addChild('D_4461', 1);
+            ->addChild('D_4461', 1); // 30
 
         // Global discount
         if ($this->globalDiscountAmount) {

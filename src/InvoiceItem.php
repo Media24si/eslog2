@@ -30,6 +30,23 @@ class InvoiceItem
 
     public int $quantityType = 47;
 
+    public string $buyerItemIdentifier = '';
+    public string $sellerItemIdentifier = '';
+
+    public function setBuyerItemIdentifier(string $buyerItemIdentifier): InvoiceItem
+    {
+        $this->buyerItemIdentifier = $buyerItemIdentifier;
+
+        return $this;
+    }
+
+    public function setSellerItemIdentifier(string $sellerItemIdentifier): InvoiceItem
+    {
+        $this->sellerItemIdentifier = $sellerItemIdentifier;
+
+        return $this;
+    }
+
     public function setRowNumber(int $rowNumber): InvoiceItem
     {
         $this->rowNumber = $rowNumber;
@@ -154,6 +171,23 @@ class InvoiceItem
             $ean->addChild('D_7143', '0160');
         }
 
+        // Item identifiers
+        if ($this->buyerItemIdentifier) {
+            $sLine = $xml->addChild('S_PIA');
+            $sLine->addChild('D_4347', 5);
+            $pia = $sLine->addChild('C_C212');
+            $pia->addChild('D_7140', $this->buyerItemIdentifier);
+            $pia->addChild('D_7143', 'IN');
+        }
+
+        if ($this->sellerItemIdentifier) {
+            $sLine = $xml->addChild('S_PIA');
+            $sLine->addChild('D_4347', 5);
+            $pia = $sLine->addChild('C_C212');
+            $pia->addChild('D_7140', $this->sellerItemIdentifier);
+            $pia->addChild('D_7143', 'SA');
+        }
+
         // Item name
         $desc = $xml->addChild('S_IMD');
         $desc->addChild('D_7077', 'F');
@@ -209,7 +243,7 @@ class InvoiceItem
         $woTax->addChild('D_5284', 1);
         $woTax->addChild('D_6411', 'C62');
 
-        if ($this->discountPercentage) {
+        // if ($this->discountPercentage) {
             $priceWoDiscount = $xml->addChild('G_SG29')
                 ->addChild('S_PRI')
                 ->addChild('C_C509');
@@ -217,7 +251,7 @@ class InvoiceItem
             $priceWoDiscount->addChild('D_5118', round($this->priceWithoutTax, 2));
             $priceWoDiscount->addChild('D_5284', 1);
             $priceWoDiscount->addChild('D_6411', 'C62');
-        }
+        // }
 
         // Tax
         $tax = $xml->addChild('G_SG34');
