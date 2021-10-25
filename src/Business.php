@@ -19,6 +19,8 @@ class Business
     public string $phone = '';
     public string $email = '';
 
+    public ?string $receiver_agent = null;
+
     public function setName(string $name): Business
     {
         $this->name = $name;
@@ -188,6 +190,18 @@ class Business
     public function setBankTitle(string $bankTitle): Business
     {
         $this->bankTitle = $bankTitle;
+
+        return $this;
+    }
+
+    public function getReceiverAgent(): ?string
+    {
+        return $this->receiver_agent;
+    }
+
+    public function setReceiverAgent(?string $receiver_agent): Business
+    {
+        $this->receiver_agent = $receiver_agent;
 
         return $this;
     }

@@ -33,13 +33,15 @@ class Hal extends Envelope
 
     public function generateXml(): \SimpleXMLElement
     {
+        /**
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="hal:icl:01" pkg_type="einvoice"></package>');
-
         $xml->addChild('timestamp', (new \DateTime())->format('Y-m-d\TH:i:s'));
 
         $envelope = $xml->addChild('envelope');
         $envelope->addAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance', 'http://www.w3.org/2001/XMLSchema-instance');
         $envelope->addAttribute('xsi:noNamespaceSchemaLocation', 'icl_eb_envelope_einvoice.xsd', 'http://www.w3.org/2001/XMLSchema-instance');
+         */
+        $envelope = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="icl_eb_envelope_einvoice.xsd"></envelope>');
 
         $this->addSenderReceiver($envelope, 'sender', $this->issuer);
         $this->addSenderReceiver($envelope, 'receiver', $this->recipient);
@@ -68,23 +70,26 @@ class Hal extends Envelope
         $paymentData->addChild('purpose', 'COST');
 
         if (count($this->attachemnts)) {
+            $sumSize = 0;
+            foreach ($this->attachemnts as $attach) {
+                $sumSize += $attach->size;
+            }
+
             $attachments = $envelope->addChild('attachments');
+            $attachments->addChild('hash', '0000000000000000000000000000000000000000');
+            $attachments->addChild('size', $sumSize);
             $attachments->addChild('count', count($this->attachemnts));
 
-            $sumSize = 0;
             foreach ($this->attachemnts as $attach) {
                 $attachment = $attachments->addChild('attachment');
                 $attachment->addChild('filename', $attach->filename);
                 $attachment->addChild('size', $attach->size);
                 $attachment->addChild('type', $attach->type);
                 $attachment->addChild('description', $attach->description);
-                $sumSize += $attach->size;
             }
-
-            $attachments->addChild('size', $sumSize);
         }
 
-        return $xml;
+        return $envelope;
     }
 
     private function addSenderReceiver(\SimpleXMLElement &$envelope, $type, Business $who)
@@ -95,11 +100,12 @@ class Hal extends Envelope
         $entity->addChild('address', $who->address);
         $entity->addChild('address', $who->zipCode . ' ' . $who->city);
         $entity->addChild($type . '_identifier', $who->vatId);
-        $entity->addChild('phone', $who->phone);
 
         $entityEddress = $entity->addChild($type . '_eddress');
-        $entityEddress->addChild($type . '_agent', str_pad($who->bic, 11, 'X', STR_PAD_RIGHT));
+        $entityEddress->addChild($type . '_agent', $who->receiver_agent ?? str_pad($who->bic, 11, 'X', STR_PAD_RIGHT));
         $entityEddress->addChild($type . '_mailbox', $who->iban);
+
+        $entity->addChild('phone', $who->phone);
     }
 
     private function addCreditorDebtor(\SimpleXMLElement &$paymentData, $type, Business $who)
