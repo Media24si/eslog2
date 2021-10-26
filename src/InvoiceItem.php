@@ -10,6 +10,7 @@ class InvoiceItem
     public int $rowNumber;
     public string $name;
     public string $description = '';
+    public string $additionalDescription = '';
     public float $quantity;
     public float $priceWithoutTax;
 
@@ -159,6 +160,13 @@ class InvoiceItem
         return $this;
     }
 
+    public function setAdditionalDescription(string $additionalDescription): InvoiceItem
+    {
+        $this->additionalDescription = $additionalDescription;
+
+        return $this;
+    }
+
     public function generateXml(): \SimpleXMLElement
     {
         $xml = new \SimpleXMLElement('<G_SG26></G_SG26>');
@@ -208,6 +216,14 @@ class InvoiceItem
         $qnt->addChild('D_6063', $this->quantityType);
         $qnt->addChild('D_6060', round($this->quantity, 2));
         $qnt->addChild('D_6411', $this->unit);
+
+        // Additional item description
+        if ($this->additionalDescription) {
+            $desc = $xml->addChild('S_FTX');
+            $desc->addChild('D_44517', 'ACB');
+            $desc->addChild('C_C108')
+                ->addChild('D_4440', mb_substr($this->additionalDescription, 0, 512));
+        }
 
         // Value total
         $vbd = $xml->addChild('G_SG27')
