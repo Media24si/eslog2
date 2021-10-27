@@ -220,7 +220,7 @@ class InvoiceItem
         // Additional item description
         if ($this->additionalDescription) {
             $desc = $xml->addChild('S_FTX');
-            $desc->addChild('D_44517', 'ACB');
+            $desc->addChild('D_4451', 'ACB');
             $desc->addChild('C_C108')
                 ->addChild('D_4440', mb_substr($this->additionalDescription, 0, 512));
         }
