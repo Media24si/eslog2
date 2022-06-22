@@ -40,7 +40,7 @@ class FreeText
 
     public function generateXml(): \SimpleXMLElement
     {
-        $xml = new \SimpleXMLElement('<S_FTX></S_FTX>');
+        $xml = new \Media24si\eSlog2\ExtendedSimpleXMLElement('<S_FTX></S_FTX>');
 
         $xml->addChild('D_4451', $this->textCode);
 
@@ -51,10 +51,10 @@ class FreeText
 
         if ($this->textValue !== null) {
             $value = $xml->addChild('C_C108');
-            $value->addChild('D_4440', strip_tags($this->textValue));
+            $value->addChildWithCDATA('D_4440', htmlspecialchars(strip_tags($this->textValue)));
 
             if ($this->textValue2 !== null) {
-                $value->addChild('D_4440_2', $this->textValue2);
+                $value->addChildWithCDATA('D_4440_2', htmlspecialchars($this->textValue2));
             }
         }
 

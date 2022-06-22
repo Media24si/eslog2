@@ -115,18 +115,18 @@ class Business
 
     public function generateXml($type = 'SE'): \SimpleXMLElement
     {
-        $xml = new \SimpleXMLElement('<G_SG2></G_SG2>');
+        $xml = new \Media24si\eSlog2\ExtendedSimpleXMLElement('<G_SG2></G_SG2>');
 
         $nad = $xml->addChild('S_NAD');
         $nad->addChild('D_3035', $type);
 
         // Name
         $nad->addChild('C_C080')
-            ->addChild('D_3036', mb_substr($this->name, 0, 70));
+            ->addChildWithCDATA('D_3036', htmlspecialchars(mb_substr($this->name, 0, 70)));
 
         // Address
         $nad->addChild('C_C059')
-            ->addChild('D_3042', mb_substr($this->address, 0, 35));
+            ->addChildWithCDATA('D_3042', htmlspecialchars(mb_substr($this->address, 0, 35)));
 
         $nad->addChild('D_3164', $this->city);
 
@@ -143,7 +143,7 @@ class Business
         $c078 = $fii->addChild('C_C078');
         $c078->addChild('D_3194', $this->iban);
         if ($this->bankTitle) {
-            $c078->addChild('D_3192', $this->bankTitle);
+            $c078->addChildWithCDATA('D_3192', htmlspecialchars($this->bankTitle));
         }
 
         if ($this->bic) {
