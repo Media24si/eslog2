@@ -169,7 +169,7 @@ class InvoiceItem
 
     public function generateXml(): \SimpleXMLElement
     {
-        $xml = new \SimpleXMLElement('<G_SG26></G_SG26>');
+        $xml = new \Media24si\eSlog2\ExtendedSimpleXMLElement('<G_SG26></G_SG26>');
 
         $sLine = $xml->addChild('S_LIN');
         $sLine->addChild('D_1082', $this->rowNumber);
@@ -200,14 +200,14 @@ class InvoiceItem
         $desc = $xml->addChild('S_IMD');
         $desc->addChild('D_7077', 'F');
         $desc->addChild('C_C273')
-            ->addChild('D_7008', mb_substr($this->name, 0, 35));
+            ->addChildWithCDATA('D_7008', htmlspecialchars(mb_substr($this->name, 0, 35)));
 
         // Item description
         if ($this->description) {
             $desc = $xml->addChild('S_IMD');
             $desc->addChild('D_7077', 'A');
             $desc->addChild('C_C273')
-                ->addChild('D_7008', mb_substr($this->description, 0, 256));
+                ->addChildWithCDATA('D_7008', htmlspecialchars(mb_substr($this->description, 0, 256)));
         }
 
         // Quantity
@@ -222,7 +222,7 @@ class InvoiceItem
             $desc = $xml->addChild('S_FTX');
             $desc->addChild('D_4451', 'ACB');
             $desc->addChild('C_C108')
-                ->addChild('D_4440', mb_substr($this->additionalDescription, 0, 512));
+                ->addChildWithCDATA('D_4440', htmlspecialchars(mb_substr($this->additionalDescription, 0, 512)));
         }
 
         // Value total
