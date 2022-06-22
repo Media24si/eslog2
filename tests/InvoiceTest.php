@@ -2,7 +2,9 @@
 
 namespace Media24si\eSlog2\Tests;
 
+use DateTime;
 use Media24si\eSlog2\Business;
+use Media24si\eSlog2\Envelope\Hal;
 use Media24si\eSlog2\FreeText;
 use Media24si\eSlog2\Invoice;
 use Media24si\eSlog2\InvoiceItem;
@@ -84,11 +86,36 @@ class InvoiceTest extends TestCase
         $invoice->addFreeText(new FreeText(FreeText::CODE_REGULATORY_INFORMATION,
             'Matična št.: 6589049, Davčna št.: SI21423512, Okrožno sodišče v Ljubljani, < & vložna št. Srg 2014/14983, Osnovni kapital: 7.500,00 EUR <br> TRR račun pri LON D.D., št.: SI56 6000 0000 0997 522, BIC: HLONSI22'));
 
+        // Reference documents
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_PROJECT_NUMBER));//AEP
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_CONTRACT));//CT
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_ORDER_NUMBER, 1));//ON
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_ORDER_NUMBER_SUPPLIER));//VN
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_RECEIVING_ADVICE_NUMBER)); //ALO
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_DELIVERY_FORM));//AAK
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_GOVERNMENT_CONTRACT_NUMBER));//GC
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_EXTERNAL_OBJECT_REFERENCE));//ATS
+        $invoice->addReferenceDocument(
+            (new ReferenceDocument(
+                ReferenceDocument::TYPE_PREVIOUS_INVOICE_NUMBER,
+                'SI123838173927'
+            ))
+                ->setDTM(ReferenceDocument::DTM_TYPE_PREVIOUS_INVOICE_DATE, new DateTime())
+        );//OI
+        $invoice->addReferenceDocument(new ReferenceDocument(ReferenceDocument::TYPE_PAYMENT_REFERENCE, 'SI123838173927'));//PQ
+
         $dom = dom_import_simplexml($invoice->generateXml())->ownerDocument;
         $dom->formatOutput = true;
 
         var_dump($dom->saveXML());
 
         $invoice->generateXml()->saveXML('inv.xml');
+
+        $envelope = (new Hal())
+            ->setFromInvoice($invoice)
+            ->setDocId(1)
+            ->setExternalDocId(1)
+            ->setRemittanceInformation('Plačilo računa ' . 1);
+        $envelope->generateXml()->saveXML('envelope.xml');
     }
 }

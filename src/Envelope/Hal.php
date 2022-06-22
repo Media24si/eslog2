@@ -95,10 +95,10 @@ class Hal extends Envelope
     private function addSenderReceiver(\SimpleXMLElement &$envelope, $type, Business $who)
     {
         $entity = $envelope->addChild($type);
-        $entity->addChild('name', $who->name);
+        $entity->addChild('name', htmlspecialchars($who->name));
         $entity->addChild('country', $who->countryIsoCode);
-        $entity->addChild('address', $who->address);
-        $entity->addChild('address', $who->zipCode . ' ' . $who->city);
+        $entity->addChild('address', htmlspecialchars($who->address));
+        $entity->addChild('address', htmlspecialchars($who->zipCode . ' ' . $who->city));
         $entity->addChild($type . '_identifier', $who->vatId);
 
         $entityEddress = $entity->addChild($type . '_eddress');
@@ -111,10 +111,10 @@ class Hal extends Envelope
     private function addCreditorDebtor(\SimpleXMLElement &$paymentData, $type, Business $who)
     {
         $entity = $paymentData->addChild($type);
-        $entity->addChild('name', $who->name);
+        $entity->addChild('name', htmlspecialchars($who->name));
         $entity->addChild('country', $who->countryIsoCode);
-        $entity->addChild('address', $who->address);
-        $entity->addChild('address', $who->zipCode . ' ' . $who->city);
+        $entity->addChild('address', htmlspecialchars($who->address));
+        $entity->addChild('address', htmlspecialchars($who->zipCode . ' ' . $who->city));
         $entity->addChild('identification');
         $entity->addChild($type . '_agent', str_pad($who->bic, 11, 'X', STR_PAD_RIGHT));
         $entity->addChild($type . '_account', $who->iban);
