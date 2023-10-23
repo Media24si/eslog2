@@ -140,8 +140,10 @@ class Business
         // IBAN
         $fii = $xml->addChild('S_FII');
         $fii->addChild('D_3035', $type === 'SE' ? 'RB' : 'BB');
-        $c078 = $fii->addChild('C_C078');
-        $c078->addChild('D_3194', $this->iban);
+        if ($this->iban) {
+            $c078 = $fii->addChild('C_C078');
+            $c078->addChild('D_3194', $this->iban);
+        }
         if ($this->bankTitle) {
             $c078->addChildWithCDATA('D_3192', htmlspecialchars($this->bankTitle));
         }
@@ -173,11 +175,13 @@ class Business
         }
 
         // Registration number
-        $vat = $xml->addChild('G_SG3')
-            ->addChild('S_RFF')
-            ->addChild('C_C506');
-        $vat->addChild('D_1153', '0199');
-        $vat->addChild('D_1154', $this->registrationNumber);
+        if ($this->registrationNumber) {
+            $vat = $xml->addChild('G_SG3')
+                ->addChild('S_RFF')
+                ->addChild('C_C506');
+            $vat->addChild('D_1153', '0199');
+            $vat->addChild('D_1154', $this->registrationNumber);
+        }
 
         // Contact
         if ($this->phone || $this->email) {

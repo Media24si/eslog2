@@ -2,37 +2,166 @@
 
 namespace Media24si\eSlog2;
 
+use Illuminate\Support\Arr;
+use Media24si\eSlog2\Segments\Identifier;
+
+/**
+ * Invoice line (BG-25)
+ * 
+ * A group of business terms providing information about individual Invoice lines.
+ */
 class InvoiceItem
 {
     public const UNIT_UNIT = 'C62';
     public const UNIT_PIECE = 'H87';
+    public const UNIT_THOUSAND = 'T3';
 
+    /**
+     * Invoice line identifier (BT-126)
+     *
+     * @var integer
+     */
     public int $rowNumber;
+
+    /**
+     * Item name (BT-153)
+     *
+     * @var string
+     */
     public string $name;
+    
+    /**
+     * Item description (BT-154)
+     *
+     * @var string
+     */
     public string $description = '';
+
+    /**
+     * Invoice line note (BT-127)
+     *
+     * @var string
+     */
     public string $additionalDescription = '';
+
+    /**
+     * Invoiced quantity (BT-129)
+     * 
+     * @var float
+     */
     public float $quantity;
+
+    /**
+     * Invoiced quantity unit of measure (BT-130)
+     * 
+     * The unit of measure that applies to the invoiced quantity.
+     *
+     * @var string
+     */
+    public string $unit = self::UNIT_UNIT;
+
+    /**
+     * Item net price (BT-146)
+     * 
+     * The price of an item, exclusive of VAT, after subtracting item price discount.
+     * 
+     * @var float
+     */
     public float $priceWithoutTax;
 
-    public float $itemPrice;
-    public float $itemPriceWithTax;
+    /**
+     * Item price discount (BT-147)
+     * 
+     * The total discount subtracted from the Item gross price to calculate the Item net price (BT-146).
+     *
+     * @var float
+     */
+    public float $itemPriceDiscount = 0;
 
+    /**
+     * Item gross price (BT-148)
+     * 
+     * The unit price, exclusive of VAT, before subtracting Item price discount.
+     * 
+     * @var float
+     */
+    public float $priceWithoutTaxBeforeDiscounts;
+
+    /**
+     * Invoice line net amount including VAT (NBT-031)
+     * 
+     * The total amount of the Invoice line, including VAT.
+     *
+     * @var float
+     */
     public float $totalWithTax;      # total - after discount and tax
+
+    /**
+     * Invoice line net amount (BT-131)
+     * 
+     * The total amount of the Invoice line
+     *
+     * @var float
+     */
     public float $totalWithoutTax;   # total - after discount
 
-    public float $discountPercentage = 0;
-    public float $discountAmount = 0;
+    /**
+     * Invoice line allowances (BG-27)
+     * 
+     * Allowances (such as discounts) for a line item.
+     *
+     * @var array
+     */
+    public array $itemAllowances = [];
 
+    /**
+     * Invoiced item VAT rate (BT-152)
+     * 
+     * The VAT rate, represented as percentage that applies to the invoiced Item.
+     *
+     * @var array
+     */
     public float $taxRate;
-    public string $taxRateType = 'S';
 
-    public string $unit = self::UNIT_UNIT;
+    /**
+     * Invoiced item VAT category code (BT-151)
+     * 
+     * The VAT category code for the invoiced item.
+     *
+     * @var string
+     */
+    public string $taxRateType = TaxSummary::CODE_STANDARD_RATE;
+
+    /**
+     * Item standard identifier (BT-157)
+     * 
+     * An item identifier based on a registered scheme.
+     *
+     * @var string
+     */
     public string $ean = '';
 
-    public int $quantityType = 47;
-
+    /**
+     * Item Buyer's identifier (BT-156)
+     * 
+     * An identifier assigned by the Buyer to the Item.
+     *
+     * @var string
+     */
     public string $buyerItemIdentifier = '';
+
+    /**
+     * Item Seller's identifier (BT-155)
+     * 
+     * An identifier assigned by the Seller to the Item.
+     *
+     * @var string
+     */
     public string $sellerItemIdentifier = '';
+
+    // Helpers - Store
+    public float $itemPrice;
+    public float $itemPriceWithTax;
 
     public function setBuyerItemIdentifier(string $buyerItemIdentifier): InvoiceItem
     {
@@ -48,6 +177,14 @@ class InvoiceItem
         return $this;
     }
 
+    /**
+     * Invoice line identifier (BT-126)
+     * 
+     * A unique identifier for the individual line within the Invoice
+     *
+     * @param integer $rowNumber
+     * @return InvoiceItem
+     */
     public function setRowNumber(int $rowNumber): InvoiceItem
     {
         $this->rowNumber = $rowNumber;
@@ -55,6 +192,12 @@ class InvoiceItem
         return $this;
     }
 
+    /**
+     * Item name (BT-153)
+     *
+     * @param string $name
+     * @return InvoiceItem
+     */
     public function setName(string $name): InvoiceItem
     {
         $this->name = $name;
@@ -62,9 +205,195 @@ class InvoiceItem
         return $this;
     }
 
+    /**
+     * Item description (BT-154)
+     *
+     * @param string $description
+     * @return InvoiceItem
+     */
+    public function setDescription(string $description): InvoiceItem
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Invoiced quantity (BT-129)
+     * 
+     * The quantity of Items (goods or services) that is charged in the Invoice line.
+     *
+     * @param float $quantity
+     * @return InvoiceItem
+     */
     public function setQuantity(float $quantity): InvoiceItem
     {
         $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    /**
+     * Item net price (BT-146)
+     * 
+     * The price of an item, exclusive of VAT, after subtracting item price discount.
+     *
+     * @param float $priceWithoutTax
+     * @return InvoiceItem
+     */
+    public function setPriceWithoutTax(float $priceWithoutTax): InvoiceItem
+    {
+        $this->priceWithoutTax = $priceWithoutTax;
+
+        return $this;
+    }
+
+    /**
+     * Item gross price (BT-148)
+     * 
+     * The unit price, exclusive of VAT, before subtracting Item price discount.
+     *
+     * @param float $priceWithoutTaxBeforeDiscounts
+     * @return InvoiceItem
+     */
+    public function setPriceWithoutTaxBeforeDiscounts(float $priceWithoutTaxBeforeDiscounts): InvoiceItem
+    {
+        $this->priceWithoutTaxBeforeDiscounts = $priceWithoutTaxBeforeDiscounts;
+
+        return $this;
+    }
+
+    /**
+     * Invoice line net amount including VAT (NBT-031)
+     * 
+     * The total amount of the Invoice line, including VAT.
+     *
+     * @param float $totalWithTax
+     * @return InvoiceItem
+     */
+    public function setTotalWithTax(float $totalWithTax): InvoiceItem
+    {
+        $this->totalWithTax = $totalWithTax;
+
+        return $this;
+    }
+
+    /**
+     * Invoice line net amount (BT-131)
+     * 
+     * The total amount of the Invoice line
+     *
+     * @param float $totalWithoutTax
+     * @return InvoiceItem
+     */
+    public function setTotalWithoutTax(float $totalWithoutTax): InvoiceItem
+    {
+        $this->totalWithoutTax = $totalWithoutTax;
+
+        return $this;
+    }
+
+    /**
+     * Item price discount (BT-147)
+     * 
+     * The total discount subtracted from the Item gross price to calculate the Item net price.
+     *
+     * @param float $itemPriceDiscount
+     * @return InvoiceItem
+     */
+    public function setItemPriceDiscount(float $itemPriceDiscount): InvoiceItem
+    {
+        $this->itemPriceDiscount = $itemPriceDiscount;
+
+        return $this;
+    }
+
+    /**
+     * Invoiced item VAT rate (BT-152)
+     * 
+     * The VAT rate, represented as percentage that applies to the invoiced Item.
+     *
+     * @param float $taxRate
+     * @return InvoiceItem
+     */
+    public function setTaxRate(float $taxRate): InvoiceItem
+    {
+        $this->taxRate = $taxRate;
+
+        return $this;
+    }
+
+    /**
+     * Invoiced item VAT category code (BT-151)
+     * 
+     * The VAT category code for the invoiced item.
+     *
+     * @param string $taxRateType
+     * @return InvoiceItem
+     */
+    public function setTaxRateType(string $taxRateType): InvoiceItem
+    {
+        $this->taxRateType = $taxRateType;
+
+        return $this;
+    }
+
+    /**
+     * Invoice line unit of measure code (BT-130)
+     * 
+     * The unit of measure that applies to the invoiced quantity.
+     *
+     * @param string $unit
+     * @return InvoiceItem
+     */
+    public function setUnit(string $unit): InvoiceItem
+    {
+        $this->unit = $unit;
+
+        return $this;
+    }
+
+    /**
+     * Item standard identifier (BT-157)
+     * 
+     * An item identifier based on a registered scheme.
+     *
+     * @param string $ean
+     * @return InvoiceItem
+     */
+    public function setEan(string $ean): InvoiceItem
+    {
+        $this->ean = $ean;
+
+        return $this;
+    }
+
+    /**
+     * Invoice line note (BT-127)
+     * 
+     * A textual note that gives unstructured information that is relevant to the Invoice line.
+     *
+     * @param string $additionalDescription
+     * @return InvoiceItem
+     */
+    public function setAdditionalDescription(string $additionalDescription): InvoiceItem
+    {
+        $this->additionalDescription = $additionalDescription;
+
+        return $this;
+    }
+
+    /**
+     * Invoice line allowances (BG-27)
+     * 
+     * Add allowances (such as discounts) to the line item.
+     *
+     * @param InvoiceItemDiscount $itemAllowance
+     * @return InvoiceItem
+     */
+    public function addItemAllowance(InvoiceItemDiscount $itemAllowance): InvoiceItem
+    {
+        $this->itemAllowances[] = $itemAllowance;
 
         return $this;
     }
@@ -83,89 +412,20 @@ class InvoiceItem
         return $this;
     }
 
-    public function setPriceWithoutTax(float $priceWithoutTax): InvoiceItem
+    /**
+     * Item discount helper functions
+     */
+    public function getFullDiscountAmount(): float
     {
-        $this->priceWithoutTax = $priceWithoutTax;
-
-        return $this;
+        // Get the sum of every itemAllowance amount field 
+        return array_reduce($this->itemAllowances, function ($carry, $itemAllowance) {
+            return $carry + $itemAllowance->getAmount();
+        }, 0);
     }
 
-    public function setTotalWithTax(float $totalWithTax): InvoiceItem
-    {
-        $this->totalWithTax = $totalWithTax;
-
-        return $this;
-    }
-
-    public function setTotalWithoutTax(float $totalWithoutTax): InvoiceItem
-    {
-        $this->totalWithoutTax = $totalWithoutTax;
-
-        return $this;
-    }
-
-    public function setDiscountPercentage(float $discountPercentage): InvoiceItem
-    {
-        $this->discountPercentage = $discountPercentage;
-
-        return $this;
-    }
-
-    public function setDiscountAmount(float $discountAmount): InvoiceItem
-    {
-        $this->discountAmount = $discountAmount;
-
-        return $this;
-    }
-
-    public function setTaxRate(float $taxRate): InvoiceItem
-    {
-        $this->taxRate = $taxRate;
-
-        return $this;
-    }
-
-    public function setTaxRateType(float $taxRateType): InvoiceItem
-    {
-        $this->taxRateType = $taxRateType;
-
-        return $this;
-    }
-
-    public function setUnit(string $unit): InvoiceItem
-    {
-        $this->unit = $unit;
-
-        return $this;
-    }
-
-    public function setEan(string $ean): InvoiceItem
-    {
-        $this->ean = $ean;
-
-        return $this;
-    }
-
-    public function setQuantityType(int $quantityType): InvoiceItem
-    {
-        $this->quantityType = $quantityType;
-
-        return $this;
-    }
-
-    public function setDescription(string $description): InvoiceItem
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    public function setAdditionalDescription(string $additionalDescription): InvoiceItem
-    {
-        $this->additionalDescription = $additionalDescription;
-
-        return $this;
-    }
+    /**
+     * End Item discount helper functions
+     */
 
     public function generateXml(): \SimpleXMLElement
     {
@@ -174,26 +434,29 @@ class InvoiceItem
         $sLine = $xml->addChild('S_LIN');
         $sLine->addChild('D_1082', $this->rowNumber);
         if ($this->ean) {
-            $ean = $sLine->addChild('C_C212');
-            $ean->addChild('D_7140', $this->ean);
-            $ean->addChild('D_7143', '0160');
+            XMLHelpers::append($sLine, (new Identifier())
+                ->setIdentifier($this->ean)
+                ->setIdentifierScheme('0160')
+                ->generateXml());
         }
 
         // Item identifiers
         if ($this->buyerItemIdentifier) {
             $sLine = $xml->addChild('S_PIA');
             $sLine->addChild('D_4347', 5);
-            $pia = $sLine->addChild('C_C212');
-            $pia->addChild('D_7140', $this->buyerItemIdentifier);
-            $pia->addChild('D_7143', 'IN');
+            XMLHelpers::append($sLine, (new Identifier())
+                ->setIdentifier($this->buyerItemIdentifier)
+                ->setIdentifierScheme('IN')
+                ->generateXml());
         }
 
         if ($this->sellerItemIdentifier) {
             $sLine = $xml->addChild('S_PIA');
             $sLine->addChild('D_4347', 5);
-            $pia = $sLine->addChild('C_C212');
-            $pia->addChild('D_7140', $this->sellerItemIdentifier);
-            $pia->addChild('D_7143', 'SA');
+            XMLHelpers::append($sLine, (new Identifier())
+                ->setIdentifier($this->sellerItemIdentifier)
+                ->setIdentifierScheme('SA')
+                ->generateXml());
         }
 
         // Item name
@@ -213,7 +476,7 @@ class InvoiceItem
         // Quantity
         $qnt = $xml->addChild('S_QTY')
             ->addChild('C_C186');
-        $qnt->addChild('D_6063', $this->quantityType);
+        $qnt->addChild('D_6063', 47);
         $qnt->addChild('D_6060', round($this->quantity, 2));
         $qnt->addChild('D_6411', $this->unit);
 
@@ -225,6 +488,7 @@ class InvoiceItem
                 ->addChildWithCDATA('D_4440', htmlspecialchars(mb_substr($this->additionalDescription, 0, 512)));
         }
 
+        // NBT-031
         // Value total
         $vbd = $xml->addChild('G_SG27')
             ->addChild('S_MOA')
@@ -232,79 +496,55 @@ class InvoiceItem
         $vbd->addChild('D_5025', '38');
         $vbd->addChild('D_5004', round($this->totalWithTax, 2));
 
+        // BT-131
         $taxAmount = $xml->addChild('G_SG27')
             ->addChild('S_MOA')
             ->addChild('C_C516');
         $taxAmount->addChild('D_5025', '203');
         $taxAmount->addChild('D_5004', round($this->totalWithoutTax, 2));
 
-        // Value before discount
-//        $vbd = $xml->addChild('G_SG29')
-//            ->addChild('S_PRI')
-//            ->addChild('C_C516');
-//        $vbd->addChild('D_5025', '203');
-//        $vbd->addChild('D_5004', round($this->price_without_tax * $this->quantity, 2));
-
-        // Price without tax
-        $priceWoTax = $this->priceWithoutTax;
-        if ($this->discountPercentage) {
-            $priceWoTax = $priceWoTax * (1 - ($this->discountPercentage / 100));
-        }
-
+        // BT-146 - Neto cena
         $woTax = $xml->addChild('G_SG29')
             ->addChild('S_PRI')
             ->addChild('C_C509');
         $woTax->addChild('D_5125', 'AAA');
-        $woTax->addChild('D_5118', round($priceWoTax, 2));
+        $woTax->addChild('D_5118', round($this->priceWithoutTax, 2));
         $woTax->addChild('D_5284', 1);
         $woTax->addChild('D_6411', 'C62');
 
-        // if ($this->discountPercentage) {
-            $priceWoDiscount = $xml->addChild('G_SG29')
-                ->addChild('S_PRI')
-                ->addChild('C_C509');
-            $priceWoDiscount->addChild('D_5125', 'AAB');
-            $priceWoDiscount->addChild('D_5118', round($this->priceWithoutTax, 2));
-            $priceWoDiscount->addChild('D_5284', 1);
-            $priceWoDiscount->addChild('D_6411', 'C62');
-        // }
+        // BT-148 - Bruto cena
+        $priceWoDiscount = $xml->addChild('G_SG29')
+            ->addChild('S_PRI')
+            ->addChild('C_C509');
+        $priceWoDiscount->addChild('D_5125', 'AAB');
+        $priceWoDiscount->addChild('D_5118', round($this->priceWithoutTaxBeforeDiscounts, 2));
+        $priceWoDiscount->addChild('D_5284', 1);
+        $priceWoDiscount->addChild('D_6411', 'C62');
 
         // Tax
         $tax = $xml->addChild('G_SG34');
-        $taxes = $tax->addChild('S_TAX');
-        $taxes->addChild('D_5283', '7');
-        $taxes->addChild('C_C241')
-            ->addChild('D_5153', 'VAT');
-        $taxes->addChild('C_C243')
-            ->addChild('D_5278', round($this->taxRate, 2));
-        $taxes->addChild('D_5305', $this->taxRateType);
+        XMLHelpers::append($tax, (new TaxSummary())
+            ->setRate($this->taxRate)
+            ->setCategoryCode($this->taxRateType)
+            ->setAmount(round($this->totalWithTax - $this->totalWithoutTax, 2))
+            ->setBaseAmount(round($this->totalWithoutTax, 2))
+            ->generateXml());
 
-        $taxAmount = $tax->addChild('S_MOA')
-            ->addChild('C_C516');
-        $taxAmount->addChild('D_5025', '124');
-        $taxAmount->addChild('D_5004', round($this->totalWithTax - $this->totalWithoutTax, 2));
+        foreach ($this->itemAllowances as $itemAllowance) {
+            $allowance = $xml->addChild('G_SG39');
+            XMLHelpers::append($allowance, $itemAllowance->generateXml());
+        }
 
-        $taxAmount = $tax->addChild('S_MOA')
-            ->addChild('C_C516');
-        $taxAmount->addChild('D_5025', '125');
-        $taxAmount->addChild('D_5004', round($this->totalWithoutTax, 2));
-
-        if ($this->discountPercentage) {
+        if ($this->itemPriceDiscount) {
+            // BT-147 - Popust na postavko
             $sg39 = $xml->addChild('G_SG39');
-            $sg39->addChild('S_ALC')
-                ->addChild('D_5463', 'A');
-
-            $percentage = $sg39->addChild('G_SG41')
-                ->addChild('S_PCD')
-                ->addChild('C_C501');
-            $percentage->addChild('D_5245', 1);
-            $percentage->addChild('D_5482', $this->discountPercentage);
-
+            $sg39alc = $sg39->addChild('S_ALC');
+            $sg39alc->addChild('D_5463', 'A');
             $amount = $sg39->addChild('G_SG42')
                 ->addChild('S_MOA')
                 ->addChild('C_C516');
-            $amount->addChild('D_5025', '204');
-            $amount->addChild('D_5004', round($this->discountAmount, 2));
+            $amount->addChild('D_5025', '509');
+            $amount->addChild('D_5004', round($this->itemPriceDiscount, 2));
         }
 
         return $xml;

@@ -8,6 +8,7 @@ use Media24si\eSlog2\Envelope\Hal;
 use Media24si\eSlog2\FreeText;
 use Media24si\eSlog2\Invoice;
 use Media24si\eSlog2\InvoiceItem;
+use Media24si\eSlog2\InvoiceItemDiscount;
 use Media24si\eSlog2\ReferenceDocument;
 use Media24si\eSlog2\TaxSummary;
 use PHPUnit\Framework\TestCase;
@@ -18,7 +19,7 @@ class InvoiceTest extends TestCase
     public function generateBasicInvoice()
     {
         $invoice = (new Invoice())
-            ->setIssuer(
+            ->setSeller(
                 (new Business())
                     ->setName('Company d.o.o.')
                     ->setAddress('Our Address 100')
@@ -31,7 +32,7 @@ class InvoiceTest extends TestCase
                     ->setIban('SI56111122223333456')
                     ->setBic('BAKOSI2XXXX')
             )
-            ->setRecipient(
+            ->setBuyer(
                 (new Business())
                     ->setName('Recipient & Name')
                     ->setAddress('Recipient Address & 101')
@@ -49,8 +50,6 @@ class InvoiceTest extends TestCase
             ->setIntroText('Some general description about the invoice. <br> &')
             ->setTotalWithoutTax(1.48)
             ->setTotalWithTax(1.81)
-            ->setGlobalDiscountAmount(null)
-            ->setGlobalDiscountPercentage(null)
             ->setLocationAddress('Ljubljana')
             ->setDateIssued(new \DateTime())
             ->setDateOfService(new \DateTime())
@@ -62,16 +61,20 @@ class InvoiceTest extends TestCase
                     ->setName('Acme 0.33L')
                     ->setQuantity(2)
                     ->setPriceWithoutTax(0.82)
+                    ->setPriceWithoutTaxBeforeDiscounts(0.82)
                     ->setTotalWithTax(1.81)
                     ->setTotalWithoutTax(1.48)
                     ->setTaxRate(22)
-                    ->setDiscountPercentage(10)
-                    ->setDiscountAmount(0.16)
+                    ->addItemAllowance(
+                        (new InvoiceItemDiscount())
+                            ->setPercentage(10)
+                            ->setAmount(0.16)
+                    )
             )
             ->addTaxSummary(
                 (new TaxSummary())
                     ->setRate(22)
-                    ->setBase(1.48)
+                    ->setBaseAmount(1.48)
                     ->setAmount(0.33)
             )
             ->addReferenceDocument(

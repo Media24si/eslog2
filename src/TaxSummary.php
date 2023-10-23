@@ -2,12 +2,24 @@
 
 namespace Media24si\eSlog2;
 
+use Media24si\eSlog2\Segments\MonetaryAmount;
+
 class TaxSummary
 {
+    public const CODE_STANDARD_RATE = 'S';
+    public const CODE_ZERO_RATE = 'Z';
+    public const CODE_EXEMPT_FROM_TAX = 'E';
+    public const CODE_VAT_REVERSE_CHARGE = 'AE';
+    public const CODE_VAT_EXEMPT_FOR_EEA_INTRA_COMMUNITY_SUPPLY_OF_GOODS_AND_SERVICES = 'K';
+    public const CODE_FREE_EXPORT_ITEM_TAX_NOT_CHARGED = 'G';
+    public const CODE_SERVICES_OUTSIDE_SCOPE_OF_TAX = 'O';
+    public const CODE_CANARY_ISLANDS_GENERAL_INDIRECT_TAX = 'L';
+    public const CODE_TAX_FOR_PRODUCTION_SERVICES_AND_IMPORTATION_IN_CEUTA_AND_MELILLA = 'M';
+
     public float $rate;
-    public float $amount;
-    public float $base;
-    public string $type = 'S';
+    public ?float $amount = null;
+    public float $baseAmount = 0;
+    public string $categoryCode = self::CODE_STANDARD_RATE;
 
     public function setRate(float $rate): TaxSummary
     {
@@ -23,23 +35,23 @@ class TaxSummary
         return $this;
     }
 
-    public function setBase(float $base): TaxSummary
+    public function setBaseAmount(float $baseAmount): TaxSummary
     {
-        $this->base = $base;
+        $this->baseAmount = $baseAmount;
 
         return $this;
     }
 
-    public function setType(string $type): TaxSummary
+    public function setCategoryCode(string $categoryCode): TaxSummary
     {
-        $this->type = $type;
+        $this->categoryCode = $categoryCode;
 
         return $this;
     }
 
     public function generateXml(): \SimpleXMLElement
     {
-        $xml = new \SimpleXMLElement('<G_SG52></G_SG52>');
+        $xml = new \SimpleXMLElement('<root></root>');
 
         $tax = $xml->addChild('S_TAX');
         $tax->addChild('D_5283', 7);
@@ -48,17 +60,27 @@ class TaxSummary
             ->addChild('D_5153', 'VAT');
         $tax->addChild('C_C243')
             ->addChild('D_5278', round($this->rate, 2));
-        $tax->addChild('D_5305', $this->type);
+        $tax->addChild('D_5305', $this->categoryCode);
 
-        $amount = $xml->addChild('S_MOA')
-            ->addChild('C_C516');
-        $amount->addChild('D_5025', '125');
-        $amount->addChild('D_5004', round($this->base, 2));
+        if ($this->amount !== null) {
+            XMLHelpers::append(
+                $xml,
+                (new MonetaryAmount())
+                    ->setAmount($this->amount)
+                    ->setCode(124)
+                    ->generateXml()
+            );
+        }
 
-        $amount_tax = $xml->addChild('S_MOA')
-            ->addChild('C_C516');
-        $amount_tax->addChild('D_5025', '124');
-        $amount_tax->addChild('D_5004', round($this->amount, 2));
+        if ($this->baseAmount) {
+            XMLHelpers::append(
+                $xml,
+                (new MonetaryAmount())
+                    ->setAmount($this->baseAmount)
+                    ->setCode(125)
+                    ->generateXml()
+            );
+        }
 
         return $xml;
     }

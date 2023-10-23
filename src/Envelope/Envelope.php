@@ -25,8 +25,8 @@ abstract class Envelope
 
     public function setFromInvoice(Invoice $invoice): self
     {
-        $this->issuer = $invoice->issuer;
-        $this->recipient = $invoice->recipient;
+        $this->issuer = $invoice->seller;
+        $this->recipient = $invoice->buyer;
 
         $this->amount = $invoice->totalWithTax;
         $this->currency = $invoice->currency;
