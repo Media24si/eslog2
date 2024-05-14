@@ -67,6 +67,7 @@ class InvoiceTest extends TestCase
                     ->setTaxRate(22)
                     ->addItemAllowance(
                         (new InvoiceItemDiscount())
+                            ->setReason('Popust')
                             ->setPercentage(10)
                             ->setAmount(0.16)
                     )
