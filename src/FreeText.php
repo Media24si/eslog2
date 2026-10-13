@@ -14,6 +14,8 @@ class FreeText
     public const CODE_TAX_DECLARATION = 'TXD';
     public const CODE_PAYMENT_INSTRUCTIONS_INFORMATION = 'PAI';
     public const CODE_PURPOSE_OF_SERVICE = 'ALQ';
+    public const CODE_SUPPLIER_REMARKS = 'SUR';
+    public const CODE_CUSTOMER_REMARKS = 'CUR';
 
     public ?string $textValue2 = null;
     public ?string $textValueCode = null;

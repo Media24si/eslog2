@@ -11,6 +11,7 @@ use Media24si\eSlog2\InvoiceItem;
 use Media24si\eSlog2\InvoiceItemDiscount;
 use Media24si\eSlog2\ReferenceDocument;
 use Media24si\eSlog2\TaxSummary;
+use Media24si\eSlog2\VatGroup;
 use PHPUnit\Framework\TestCase;
 
 class InvoiceTest extends TestCase
@@ -21,13 +22,21 @@ class InvoiceTest extends TestCase
         $invoice = (new Invoice())
             ->setSeller(
                 (new Business())
-                    ->setName('Company d.o.o.')
-                    ->setAddress('Our Address 100')
+                    ->setName('X d.o.o.')
+                    ->setAddress('Novo naselje 3')
                     ->setZipCode(1000)
                     ->setCity('Ljubljana')
                     ->setCountry('Slovenia')
                     ->setCountryIsoCode('SI')
                     ->setVatId('12345678')
+                    ->setVatGroup(
+                        (new VatGroup())
+                            ->setName('Y - skupina za DDV')
+                            ->setAddress('Nova ulica 5')
+                            ->setZipCode('1000')
+                            ->setCity('Ljubljana')
+                            ->setVatId('SI87654321')
+                    )
                     ->setRegistrationNumber('555555555')
                     ->setIban('SI56111122223333456')
                     ->setBic('BAKOSI2XXXX')

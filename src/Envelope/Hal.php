@@ -99,7 +99,7 @@ class Hal extends Envelope
         $entity->addChild('country', $who->countryIsoCode);
         $entity->addChild('address', htmlspecialchars($who->address));
         $entity->addChild('address', htmlspecialchars($who->zipCode . ' ' . $who->city));
-        $entity->addChild($type . '_identifier', $who->vatId);
+        $entity->addChild($type . '_identifier', $who->getEffectiveVatId());
 
         $entityEddress = $entity->addChild($type . '_eddress');
         $entityEddress->addChild($type . '_agent', $who->receiver_agent ?? str_pad($who->bic, 11, 'X', STR_PAD_RIGHT));

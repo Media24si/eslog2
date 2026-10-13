@@ -2,8 +2,12 @@
 
 namespace Media24si\eSlog2;
 
+use Media24si\eSlog2\Exceptions\ValidationException;
+
 class Business
 {
+    public const VAT_GROUP_MEMBER_SUFFIX = ' - član skupine za DDV';
+
     public string $name;
     public string $address;
     public string $city;
@@ -14,7 +18,9 @@ class Business
     public string $bic = '';
     public string $bankTitle = '';
     public string $registrationNumber;
-    public string $vatId;
+    public ?string $vatId = null;
+    public ?string $taxNumber = null;
+    public ?VatGroup $vatGroup = null;
     public string $internalIdentifier = '';
 
     public string $phone = '';
@@ -92,6 +98,33 @@ class Business
         return $this;
     }
 
+    public function setTaxNumber(string $taxNumber): Business
+    {
+        $this->taxNumber = $taxNumber;
+
+        return $this;
+    }
+
+    public function setVatGroup(?VatGroup $vatGroup): Business
+    {
+        $this->vatGroup = $vatGroup;
+
+        return $this;
+    }
+
+    public function isVatGroupMember(): bool
+    {
+        return $this->vatGroup !== null;
+    }
+
+    /**
+     * VAT identifier written to the VA reference - the group's VAT ID for VAT group members
+     */
+    public function getEffectiveVatId(): ?string
+    {
+        return $this->vatGroup?->vatId ?? $this->vatId;
+    }
+
     public function setInternalIdentifier(string $internalIdentifier): Business
     {
         $this->internalIdentifier = $internalIdentifier;
@@ -120,9 +153,14 @@ class Business
         $nad = $xml->addChild('S_NAD');
         $nad->addChild('D_3035', $type);
 
-        // Name
+        // Name - a seller that is a VAT group member must be marked as such (BT-27)
+        if ($type === 'SE' && $this->isVatGroupMember()) {
+            $name = mb_substr($this->name, 0, 70 - mb_strlen(self::VAT_GROUP_MEMBER_SUFFIX)) . self::VAT_GROUP_MEMBER_SUFFIX;
+        } else {
+            $name = mb_substr($this->name, 0, 70);
+        }
         $nad->addChild('C_C080')
-            ->addChildWithCDATA('D_3036', htmlspecialchars(mb_substr($this->name, 0, 70)));
+            ->addChildWithCDATA('D_3036', htmlspecialchars($name));
 
         // Address
         $nad->addChild('C_C059')
@@ -153,17 +191,30 @@ class Business
                 ->addChild('D_3433', $this->bic);
         }
 
-        // VAT
-        $vat = $xml->addChild('G_SG3')
-            ->addChild('S_RFF')
-            ->addChild('C_C506');
-        $vat->addChild('D_1153', 'VA');
-        $vat->addChild('D_1154', $this->vatId);
-        $vat = $xml->addChild('G_SG3')
-            ->addChild('S_RFF')
-            ->addChild('C_C506');
-        $vat->addChild('D_1153', 'AHP');
-        $vat->addChild('D_1154', $this->vatId);
+        // VAT - the group's VAT ID for VAT group members (BT-31 / BT-48)
+        $vatId = $this->getEffectiveVatId();
+        if ($vatId) {
+            $vat = $xml->addChild('G_SG3')
+                ->addChild('S_RFF')
+                ->addChild('C_C506');
+            $vat->addChild('D_1153', 'VA');
+            $vat->addChild('D_1154', $vatId);
+        }
+
+        // Tax number (BT-32 / NBT-013) - for VAT group members this is the member's own number, never the group's VAT ID
+        $taxNumber = $this->taxNumber ?? $this->vatId;
+        if (!$taxNumber && $type === 'SE' && $this->isVatGroupMember()) {
+            throw new ValidationException(
+                'Seller is a VAT group member but its tax number (BT-32) is not set - call Business::setVatId() or Business::setTaxNumber().'
+            );
+        }
+        if ($taxNumber) {
+            $vat = $xml->addChild('G_SG3')
+                ->addChild('S_RFF')
+                ->addChild('C_C506');
+            $vat->addChild('D_1153', 'AHP');
+            $vat->addChild('D_1154', $taxNumber);
+        }
 
         // Internal identifier
         if ($this->internalIdentifier) {

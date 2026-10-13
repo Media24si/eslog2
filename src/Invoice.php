@@ -550,6 +550,25 @@ class Invoice
         return null;
     }
 
+    /**
+     * VAT group name and address for VAT group members (BT-22) - SUR for the seller, CUR for the buyer
+     *
+     * @return array<FreeText>
+     */
+    private function vatGroupFreeTexts(): array
+    {
+        $texts = [];
+
+        foreach ([FreeText::CODE_SUPPLIER_REMARKS => $this->seller, FreeText::CODE_CUSTOMER_REMARKS => $this->buyer] as $code => $business) {
+            if ($business->isVatGroupMember()) {
+                $texts[] = (new FreeText($code, $business->vatGroup->name))
+                    ->setTextValue2($business->vatGroup->getFullAddress());
+            }
+        }
+
+        return $texts;
+    }
+
     public function addReferenceDocument(ReferenceDocument $referenceDocument): Invoice
     {
         $this->referenceDocuments[] = $referenceDocument;
@@ -667,7 +686,7 @@ class Invoice
         }
 
         // Free text
-        foreach ($this->freeText as $text) {
+        foreach (array_merge($this->freeText, $this->vatGroupFreeTexts()) as $text) {
             $ftx = $mInvoice->addChild('S_FTX');
             XMLHelpers::append($ftx, $text->generateXml());
         }
